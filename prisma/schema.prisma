@@ -1,0 +1,117 @@
+generator client {
+    provider = "prisma-client"
+    output   = "../generated/prisma"
+}
+
+datasource db {
+    provider = "postgresql"
+}
+
+model User {
+    id Int @id @default(autoincrement())
+
+    login    String  @unique
+    name     String
+    password String
+    salt     String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Peer {
+    id Int @id @default(autoincrement())
+
+    name       String
+    externalId String
+    config     String?
+
+    lastHandshake DateTime?
+
+    status PeerStatus @default(ACTIVE)
+
+    receivedBytes BigInt @default(0)
+    sentBytes     BigInt @default(0)
+
+    createdAt DateTime @default(now())
+
+    serverId Int
+    server   Server? @relation(fields: [serverId], references: [id])
+
+    client   Client @relation(fields: [clientId], references: [id])
+    clientId Int    @unique
+
+    monthlyStats PeerMonthlyStats[]
+}
+
+model Server {
+    id Int @id @default(autoincrement())
+
+    type ServerType
+    name String     @unique
+
+    description String
+
+    baseUrl  String
+    apiToken String
+
+    peers Peer[]
+}
+
+model Client {
+    id          Int     @id @default(autoincrement())
+    name        String
+    description String
+    balance     Int     @default(0)
+    isFree      Boolean @default(false)
+    tariff      Int     @default(0)
+
+    createdAt DateTime @default(now())
+
+    accessTokenId   String? @unique
+    accessTokenHash String?
+
+    peer                Peer?
+    balanceTransactions BalanceTransaction[]
+}
+
+model BalanceTransaction {
+    id Int @id @default(autoincrement())
+
+    amount Int
+    type   TransactionType
+
+    client   Client @relation(fields: [clientId], references: [id])
+    clientId Int
+
+    createdAt DateTime @default(now())
+}
+
+//Модель для учета трафика по месяцам
+model PeerMonthlyStats {
+    id    Int      @id @default(autoincrement())
+    month DateTime
+
+    peerId Int
+    peer   Peer @relation(fields: [peerId], references: [id])
+
+    receivedBytes BigInt
+    sentBytes     BigInt
+
+    createdAt DateTime @default(now())
+}
+
+enum PeerStatus {
+    ACTIVE
+    INACTIVE
+}
+
+enum TransactionType {
+    TOP_UP
+    DAILY_CHARGE
+}
+
+enum ServerType {
+    WG_REST_API
+    AMNEZIA_API
+}
