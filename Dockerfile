@@ -36,7 +36,7 @@ FROM node:22-alpine AS runner
 WORKDIR /app
 
 # Исправлено: используем apk вместо apt-get для установки openssl
-RUN apk add --no-cache openssl dirent
+RUN apk add --no-cache openssl
 
 RUN addgroup --system --gid 1001 nodejs \
     && adduser --system --uid 1001 nextjs
