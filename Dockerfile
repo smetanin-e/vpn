@@ -15,7 +15,8 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 
 COPY package.json pnpm-lock.yaml ./
-# Флаг --aggregate-output делает логи чище в CI
+#Обязательно копируем файл конфигурации разрешений вместе с lock-файлом!
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml* ./
 RUN pnpm install --frozen-lockfile --aggregate-output
 
 # ---- Builder ----
