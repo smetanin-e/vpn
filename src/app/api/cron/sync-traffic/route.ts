@@ -1,4 +1,7 @@
 import { syncTraffic } from '@/src/features/peer/model/service/sync-traffic';
+import { handleApiError } from '@/src/shared/lib/api-error-handler';
+import { UnauthorizedError } from '@/src/shared/lib/errors/app-error';
+import { logger } from '@/src/shared/lib/logger';
 import { validateCronToken } from '@/src/shared/lib/validate-cron-token';
 import { NextResponse } from 'next/server';
 
@@ -6,7 +9,7 @@ export async function GET(req: Request) {
   try {
     // 🔐 Проверка токена
     if (!validateCronToken(req)) {
-      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+      throw new UnauthorizedError();
     }
 
     await syncTraffic();
@@ -15,7 +18,7 @@ export async function GET(req: Request) {
       message: 'Трафик синхронизирован',
     });
   } catch (error) {
-    console.error('WG sync error', error);
-    return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 });
+    logger.error('[API_CRON_SYNC_TRASFFIC] sync error', error);
+    return handleApiError(error);
   }
 }

@@ -1,4 +1,5 @@
 import { clientAxiosInstance } from '@/src/shared/api/client';
+import { logger } from '@/src/shared/lib/logger';
 
 export const downloadConfig = async (peerId: number, peerName: string) => {
   try {
@@ -16,7 +17,8 @@ export const downloadConfig = async (peerId: number, peerName: string) => {
 
     return { success: true };
   } catch (error) {
-    console.error('[downloadConfig]', error);
+    logger.error('[downloadConfig] failed', error);
+
     return {
       success: false,
       message: 'Ошибка при скачивании файла конфигурации',

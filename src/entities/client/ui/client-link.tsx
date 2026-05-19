@@ -2,6 +2,7 @@
 
 import { generateClientAccess } from '@/src/features/client/actions/generate-client-access';
 import { Button } from '@/src/shared/components/ui';
+import { logger } from '@/src/shared/lib/logger';
 import { Link } from 'lucide-react';
 import React from 'react';
 import { toast } from 'sonner';
@@ -23,7 +24,8 @@ export const ClientLink: React.FC<Props> = ({ id, tokenId }) => {
       toast.success('Ссылка скопирована в буфер обмена');
       setCreatedLink(true);
     } catch (error) {
-      console.error('Failed to generate access link', error);
+      logger.error('[ClientLink] Failed to generate access link', error);
+
       toast.error('Ошибка при создании ссылки');
     }
   };

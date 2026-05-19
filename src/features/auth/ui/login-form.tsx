@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { FormInput } from '@/src/shared/components/form';
 import { LoginFormType, loginSchema } from '../model';
+import { logger } from '@/src/shared/lib/logger';
 
 interface Props {
   className?: string;
@@ -40,7 +41,8 @@ export const LoginForm: React.FC<Props> = ({ onClose }) => {
       router.push('/dashboard');
       toast.success('Успешная авторизация!');
     } catch (error) {
-      console.error('Error [LOGIN]', error);
+      logger.error('[LOGIN] Error', error);
+
       return toast.error(error instanceof Error ? error.message : 'Не удалось войти в аккаунт ❌');
     }
   };

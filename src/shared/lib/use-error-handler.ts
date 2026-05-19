@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { toast } from 'sonner';
+import { logger } from './logger';
 
 type ErrorHandlerOptions = {
   showToast?: boolean;
@@ -15,7 +16,7 @@ export function useErrorHandler(options: ErrorHandlerOptions = {}) {
     (error: unknown, customMessage?: string) => {
       // Логируем в консоль
       if (logToConsole) {
-        console.error('[Client Error]:', error);
+        logger.error('[Client Error]:', error);
       }
 
       // Определяем сообщение

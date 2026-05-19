@@ -7,6 +7,7 @@ import { changePasswordSchema, ChangePasswordType } from '../schemas/change-pass
 import { changeUserPasswordAction } from '../actions/change-user-password';
 import { FormInput } from '@/src/shared/components/form';
 import { Button } from '@/src/shared/components/ui';
+import { logger } from '@/src/shared/lib/logger';
 
 interface Props {
   className?: string;
@@ -32,9 +33,10 @@ export const ChangePasswordForm: React.FC<Props> = ({ id, setOpen }) => {
         return;
       }
       setOpen(false);
-      toast.success('Пароль успешно изменен✅');
+      toast.success('Пароль успешно изменен');
     } catch (error) {
-      console.error('Error [LOGIN_FORM]', error);
+      logger.error(`[LOGIN_FORM] Error`, error);
+
       return toast.error(error instanceof Error ? error.message : 'Ошибка ❌');
     }
   };

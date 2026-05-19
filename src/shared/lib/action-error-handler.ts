@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { redirect } from 'next/navigation';
 import { AppError, UnauthorizedError } from './errors/app-error';
+import { logger } from './logger';
 
 type ActionResult<T = any> = {
   success: boolean;
@@ -15,7 +16,7 @@ export async function handleActionError<T>(
   redirectOnUnauthorized: boolean = true,
 ): Promise<ActionResult<T>> {
   // Логируем ошибку
-  console.error('[Action Error]:', error);
+  logger.error(`[API Error]:`, error);
 
   //Если ошибка кастомная
   if (error instanceof AppError) {

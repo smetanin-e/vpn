@@ -9,6 +9,7 @@ import { FormInput, FormSelect, FormTextarea } from '@/src/shared/components/for
 import { createServerSchema, CreateServerType } from '../model/schemas/create-server.schema';
 import { SERVER_TYPE_OPTIONS } from '@/src/shared/constants/server';
 import { useServerMutations } from '../model/hooks/use-server.mutations';
+import { logger } from '@/src/shared/lib/logger';
 
 interface Props {
   className?: string;
@@ -28,7 +29,7 @@ export const CreateServerForm: React.FC<Props> = ({ setOpen }) => {
       await createServer.mutateAsync(data);
       setOpen(false);
     } catch (error) {
-      console.error('Error [CREATE_SERVER_FORM]', error);
+      logger.error(`[CREATE_SERVER_FORM] Error`, error);
     }
   };
   return (

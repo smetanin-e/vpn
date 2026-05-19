@@ -1,6 +1,7 @@
 import { prisma } from '@/src/shared/lib/prisma';
 import { groupPeersByServer } from './groupe-peers-by-server';
 import { getPeerApi } from '../../api/peer-api-cache';
+import { logger } from '@/src/shared/lib/logger';
 
 export async function syncTraffic() {
   try {
@@ -130,18 +131,21 @@ export async function syncTraffic() {
                   );
                 }
               } catch (error) {
-                console.error(`Sync error for peer ${dbPeer.id} (server ${serverId})`, error);
+                logger.error(
+                  `[syncTraffic] Sync error for peer ${dbPeer.id} (server ${serverId})`,
+                  error,
+                );
               }
             }),
           );
         } catch (error) {
-          console.error(`Sync error for server ${serverId} (${server?.name})`, error);
+          logger.error(`[syncTraffic] Sync error for server ${serverId} (${server?.name})`, error);
         }
       }),
     );
 
-    console.log('Traffic sync completed successfully');
+    logger.info(`[syncTraffic] Traffic sync completed successfully`);
   } catch (error) {
-    console.error('Global sync error:', error);
+    logger.error(`[syncTraffic] Global sync error`, error);
   }
 }

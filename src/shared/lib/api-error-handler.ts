@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { AppError } from './errors/app-error';
 import { isAxiosError } from 'axios';
+import { logger } from './logger';
 
 type ErrorResponse = {
   error: string;
@@ -11,8 +12,8 @@ type ErrorResponse = {
 
 export function handleApiError(error: unknown): NextResponse<ErrorResponse> {
   //Логируем ошибку
-  console.error('[API Error]:', error);
 
+  logger.error(`[API Error]:`, error);
   //Если ошибка кастомная
   if (error instanceof AppError) {
     return NextResponse.json(

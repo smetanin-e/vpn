@@ -6,6 +6,7 @@ import React from 'react';
 
 import { cn } from '@/src/shared/lib/utils';
 import { useClientMutations } from '../../client/model/hooks/use-client-mutations';
+import { logger } from '@/src/shared/lib/logger';
 
 interface Props {
   className?: string;
@@ -19,7 +20,7 @@ export const ChangeFreeMode: React.FC<Props> = ({ id, isFree }) => {
     try {
       await toggleFreeMode.mutateAsync(id);
     } catch (error) {
-      console.error('Failed to toggle free mode', error);
+      logger.error(`[ChangeFreeMode] Failed to toggle free mode`, error);
     }
   };
   return (

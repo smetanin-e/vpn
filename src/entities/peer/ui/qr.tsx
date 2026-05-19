@@ -14,6 +14,8 @@ import {
 } from '@/src/shared/components/ui';
 import { toast } from 'sonner';
 import { showQrCode } from '@/src/features/peer/model/lib/show-qr';
+import { logger } from '@/src/shared/lib/logger';
+import { NotFoundError } from '@/src/shared/lib/errors/app-error';
 
 interface Props {
   dbPeerId: number;
@@ -30,11 +32,12 @@ export const Qr: React.FC<Props> = ({ dbPeerId, peerName }: Props) => {
       const url = await showQrCode(dbPeerId);
       console.log(url);
       if (!url) {
-        throw new Error('Не удалось загрузить QR-code');
+        throw new NotFoundError('Не удалось загрузить QR-code');
       }
       setQrUrl(url);
     } catch (error) {
-      console.error('Ошибка при загрузке QR:', error);
+      logger.error('[fetchQr] Ошибка при загрузке QR', error);
+
       toast.error(error instanceof Error ? error.message : 'Ошибка при загрузке QR ❌');
     } finally {
       setLoading(false);

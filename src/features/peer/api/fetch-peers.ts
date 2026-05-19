@@ -1,5 +1,7 @@
 import { PeerQueryType } from '@/src/entities/peer/model/types';
 import { clientAxiosInstance } from '@/src/shared/api/client';
+import { NotFoundError } from '@/src/shared/lib/errors/app-error';
+import { logger } from '@/src/shared/lib/logger';
 
 interface FetchPeersParams {
   pageParam?: number;
@@ -31,7 +33,7 @@ export const fetchPeers = async ({
     const { data } = await clientAxiosInstance.get<PeerQueryType[]>(`/peers?${params.toString()}`);
 
     if (!data) {
-      throw new Error('Ошибка при загрузке пиров');
+      throw new NotFoundError('Ошибка при загрузке пиров');
     }
 
     const hasMore = data.length === take;
@@ -40,7 +42,7 @@ export const fetchPeers = async ({
       nextPage: hasMore ? pageParam + 1 : undefined,
     };
   } catch (error) {
-    console.error('[fetchPeers] failed', error);
+    logger.error('[fetchPeers] failed', error);
     throw error;
   }
 };

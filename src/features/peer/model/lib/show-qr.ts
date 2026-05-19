@@ -1,4 +1,5 @@
 import { clientAxiosInstance } from '@/src/shared/api/client';
+import { logger } from '@/src/shared/lib/logger';
 
 export const showQrCode = async (dbPeerId: number) => {
   try {
@@ -8,6 +9,6 @@ export const showQrCode = async (dbPeerId: number) => {
 
     return URL.createObjectURL(res.data);
   } catch (error) {
-    console.error('[showQrCode]', error);
+    logger.error('[showQrCode] failed', error);
   }
 };

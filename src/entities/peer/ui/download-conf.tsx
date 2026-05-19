@@ -2,6 +2,7 @@
 
 import { downloadConfig } from '@/src/features/peer/model/lib/download-config';
 import { Button, Spinner } from '@/src/shared/components/ui';
+import { logger } from '@/src/shared/lib/logger';
 import { Download } from 'lucide-react';
 import React from 'react';
 import { toast } from 'sonner';
@@ -19,7 +20,8 @@ export const DownloadConf: React.FC<Props> = ({ peerId, peerName }) => {
 
       await downloadConfig(peerId, peerName);
     } catch (error) {
-      console.error('Ошибка загрузки ❌', error);
+      logger.error('[DownloadConf] Ошибка загрузки', error);
+
       toast.error(error instanceof Error ? error.message : 'Ошибка загрузке ❌');
     } finally {
       setLoading(false);

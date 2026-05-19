@@ -2,8 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 
 import { clientAxiosInstance } from '@/src/shared/api/client';
 import { PeerQueryType } from '../types';
+import { useErrorHandler } from '@/src/shared/lib/use-error-handler';
 
 export const useGetPeer = (id: number) => {
+  const { handleError } = useErrorHandler();
   return useQuery({
     queryKey: ['peer', id], // ← id в queryKey
     queryFn: async () => {
@@ -11,7 +13,7 @@ export const useGetPeer = (id: number) => {
         const { data } = await clientAxiosInstance.get<PeerQueryType>(`/peer/${id}`);
         return data;
       } catch (error) {
-        console.error('[getPeerById] failed', error);
+        handleError(error, 'Не удалось загрузить данные пира');
         throw error;
       }
     },

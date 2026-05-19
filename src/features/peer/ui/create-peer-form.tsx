@@ -11,6 +11,7 @@ import { createPeerSchema, CreatePeerType } from '../model/schemas/create-peer.s
 import { transformToSelectOptions } from '../../server/model/libs/transform-select-options';
 import { usePeerMutations } from '../model/hooks/use-peer-mutations';
 import { useGetServers } from '@/src/entities/server/model/hooks/use-get-servers';
+import { logger } from '@/src/shared/lib/logger';
 
 interface Props {
   className?: string;
@@ -39,7 +40,7 @@ export const CreatePeerForm: React.FC<Props> = ({ setOpen, userId }) => {
       await createPeer.mutateAsync(payload);
       setOpen(false);
     } catch (error) {
-      console.error('Error [CREATE_PEER_FORM]', error);
+      logger.error(`[CREATE_PEER_FORM] Error`, error);
     }
   };
   return (

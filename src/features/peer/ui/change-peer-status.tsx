@@ -6,6 +6,7 @@ import { Switch } from '@/src/shared/components/ui';
 import React from 'react';
 import { usePeerMutations } from '../model/hooks/use-peer-mutations';
 import { cn } from '@/src/shared/lib/utils';
+import { logger } from '@/src/shared/lib/logger';
 
 interface Props {
   className?: string;
@@ -19,7 +20,7 @@ export const ChangePeerStatus: React.FC<Props> = ({ id, status }) => {
     try {
       await togglePeerStatus.mutateAsync(id);
     } catch (error) {
-      console.error('Failed to toggle peer status', error);
+      logger.error(`[ChangePeerStatus] Failed to toggle peer status`, error);
     }
   };
   return (

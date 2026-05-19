@@ -4,6 +4,7 @@ import { Button } from '@/src/shared/components/ui';
 import { Trash2 } from 'lucide-react';
 import React from 'react';
 import { usePeerMutations } from '../model/hooks/use-peer-mutations';
+import { logger } from '@/src/shared/lib/logger';
 
 interface Props {
   className?: string;
@@ -18,7 +19,7 @@ export const DeletePeer: React.FC<Props> = ({ peerId, clientId }) => {
     try {
       await deletePeer.mutateAsync(peerId);
     } catch (error) {
-      console.error('Failed to delete peer', error);
+      logger.error(`[DeletePeer] Failed to delete peer`, error);
     }
   };
   return (
