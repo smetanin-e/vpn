@@ -3,12 +3,15 @@
 import { generateSalt, hashPassword, verifyPassword } from '@/src/shared/lib/auth/password-utils';
 import { ChangePasswordType } from '../schemas/change-password-schema';
 import { userRepository } from '@/src/entities/user/repository/user.repository';
+import { NotFoundError, ValidationError } from '@/src/shared/lib/errors/app-error';
+import { logger } from '@/src/shared/lib/logger';
+import { handleActionError } from '@/src/shared/lib/action-error-handler';
 
 export const changeUserPasswordAction = async (userId: number, formData: ChangePasswordType) => {
   try {
     const user = await userRepository.findUserByIdWithPassword(userId);
     if (!user) {
-      return { success: false, message: 'Пользователь не найден' };
+      throw new NotFoundError('Пользователь не найден');
     }
 
     const isValidPassword = await verifyPassword(
@@ -17,7 +20,7 @@ export const changeUserPasswordAction = async (userId: number, formData: ChangeP
       user.salt!,
     );
     if (!isValidPassword) {
-      return { success: false, message: 'Текущий пароль неверный' };
+      throw new ValidationError('Текущий пароль неверный');
     }
 
     const salt = generateSalt();
@@ -27,7 +30,7 @@ export const changeUserPasswordAction = async (userId: number, formData: ChangeP
 
     return { success: true };
   } catch (error) {
-    console.error('[CHANGE_USER_PASSWORD] Server error', error);
-    return { success: false, message: 'Ошибка изменения пароля' };
+    logger.error(`[CHANGE_USER_PASSWORD] Server error`, error);
+    return handleActionError(error);
   }
 };

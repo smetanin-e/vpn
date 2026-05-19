@@ -1,17 +1,32 @@
 import { dailyCharge } from '@/src/features/client/model/service/daily-charge';
+import { handleApiError } from '@/src/shared/lib/api-error-handler';
+import { UnauthorizedError } from '@/src/shared/lib/errors/app-error';
+import { logger } from '@/src/shared/lib/logger';
 import { validateCronToken } from '@/src/shared/lib/validate-cron-token';
 import { NextResponse } from 'next/server';
 
 export async function GET(req: Request) {
+  const requestId = crypto.randomUUID();
   try {
+    logger.info(`[CRON] Daily charge request ${requestId} started`);
     // 🔐 Проверка токена
     if (!validateCronToken(req)) {
-      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+      logger.warn(`[CRON] Daily charge request ${requestId} - invalid token`);
+      throw new UnauthorizedError('Недействительный токен доступа');
     }
-    await dailyCharge();
-    return Response.json({ success: true });
+
+    // Выполняем списание
+    const result = await dailyCharge();
+
+    logger.info(`[CRON] Daily charge request ${requestId} completed`, result);
+
+    return NextResponse.json({
+      success: result.failed === 0,
+      requestId,
+      ...result,
+    });
   } catch (error) {
-    console.error('WG sync error', error);
-    return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 });
+    logger.error(`[CRON] Daily charge request ${requestId} failed`, error);
+    return handleApiError(error);
   }
 }

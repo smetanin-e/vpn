@@ -2,17 +2,20 @@
 
 import { clientRepository } from '@/src/entities/client/repository/client.repository';
 import { peerRepository } from '@/src/entities/peer/repository/peer.repository';
+import { handleActionError } from '@/src/shared/lib/action-error-handler';
+import { NotFoundError } from '@/src/shared/lib/errors/app-error';
+import { logger } from '@/src/shared/lib/logger';
 
 export async function toggleFreeModeAction(dbPeerId: number) {
   try {
     const peer = await peerRepository.findPeerById(dbPeerId);
     if (!peer) {
-      return { success: false, message: 'Конфигурация не найдена' };
+      throw new NotFoundError('Пир не найден');
     }
 
     const client = await clientRepository.findClientById(peer.clientId);
     if (!client) {
-      return { success: false, message: 'Клиент не найден' };
+      throw new NotFoundError('Клиент не найден');
     }
 
     const currentMode = client.isFree;
@@ -23,7 +26,7 @@ export async function toggleFreeModeAction(dbPeerId: number) {
 
     return { success: true };
   } catch (error) {
-    console.error('[TOGGLE_FREE_MODE] Server error', error);
-    return { success: false, message: 'Ошибка изменения статуса тарифа' };
+    logger.error(`[TOGGLE_FREE_MODE] Server error`, error);
+    return handleActionError(error);
   }
 }

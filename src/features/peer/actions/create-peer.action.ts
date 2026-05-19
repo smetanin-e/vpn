@@ -4,6 +4,13 @@ import { userRepository } from '@/src/entities/user/repository/user.repository';
 import { createPeerApi } from '../api/create-peer-api';
 import { clientRepository } from '@/src/entities/client/repository/client.repository';
 import { peerRepository } from '@/src/entities/peer/repository/peer.repository';
+import {
+  NotFoundError,
+  UnauthorizedError,
+  ValidationError,
+} from '@/src/shared/lib/errors/app-error';
+import { handleActionError } from '@/src/shared/lib/action-error-handler';
+import { logger } from '@/src/shared/lib/logger';
 
 type CreatePeerData = {
   serverId: number;
@@ -15,17 +22,18 @@ type CreatePeerData = {
 
 export async function createPeerAction(data: CreatePeerData) {
   let createdPeerId: string | null = null;
+  let createdClientId: number | null = null;
   let peerApiInstance = null;
 
   try {
     const user = await userRepository.findUserById(data.adminId);
     if (!user) {
-      return { success: false, message: 'Администратор не найден' };
+      throw new UnauthorizedError('Пользователь не авторизован');
     }
 
     const server = await serverRepository.findById(data.serverId);
     if (!server) {
-      return { success: false, message: 'Сервер не найден' };
+      throw new NotFoundError('Сервер не найден');
     }
 
     peerApiInstance = createPeerApi(server);
@@ -36,30 +44,72 @@ export async function createPeerAction(data: CreatePeerData) {
       data.tariff,
     );
     if (!client) {
-      return { success: false, message: 'Ошибка при создании клиента в БД' };
+      throw new ValidationError('Не удалось создать клиента в базе данных');
     }
+
+    createdClientId = client.id;
+
     const peerName = `ClientID:${client.id}`;
     const peer = await peerApiInstance.create(peerName);
-    if (!peer) {
-      return { success: false, message: 'Ошибка при создании пира на сервере' };
+    if (!peer || !peer.id) {
+      throw new ValidationError('Не удалось создать пир на сервере');
     }
+
     createdPeerId = peer.id;
 
-    await peerRepository.createPeerDb(client.id, server.id, peer.id, peerName, peer.config);
+    const savedPeer = await peerRepository.createPeerDb(
+      client.id,
+      server.id,
+      peer.id,
+      peerName,
+      peer.config,
+    );
 
-    return { success: true, message: 'Пир успешно создан' };
+    if (!savedPeer) {
+      throw new ValidationError('Не удалось сохранить пир в базе данных');
+    }
+
+    logger.info(`[CREATE_PEER_ACTION] Peer created successfully`, {
+      peerId: savedPeer.id,
+      clientId: client.id,
+      adminId: data.adminId,
+    });
+
+    return {
+      success: true,
+      message: 'Пир успешно создан',
+      data: {
+        peerId: savedPeer.id,
+        clientId: client.id,
+        config: peer.config,
+      },
+    };
   } catch (error) {
     // 💥 Удалить пир, если что-то пошло не так
     if (createdPeerId && peerApiInstance) {
       try {
-        //TODO ДОБАВИТЬ УДАЛЕНИЕ КЛИЕНТА
         await peerApiInstance.delete(createdPeerId);
-        console.log(`Rollback: peer ${createdPeerId} удалён`);
+
+        logger.info(`Rollback: peer ${createdPeerId} удалён`);
       } catch (deleteError) {
-        console.error('Rollback failed: не удалось удалить пир', deleteError);
+        logger.error(`[ROLLBACK FAILED] Не удалось удалить peer ${createdPeerId}:`, deleteError);
       }
     }
-    console.error('[CREATE_PEER] Server error', error);
-    return { success: false, message: 'Ошибка создания пира' };
+
+    // Удаляем клиента из БД, если он был создан
+    if (createdClientId) {
+      try {
+        await clientRepository.deleteClient(createdClientId);
+        logger.info(`[ROLLBACK] Клиент ${createdClientId} удалён из БД`);
+      } catch (deleteError) {
+        logger.error(
+          `[ROLLBACK FAILED] Не удалось удалить клиента ${createdClientId}:`,
+          deleteError,
+        );
+      }
+    }
+    logger.error(`[CREATE_PEER_ACTION] Action failed`, error);
+
+    return handleActionError(error);
   }
 }

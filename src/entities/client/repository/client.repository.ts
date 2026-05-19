@@ -1,5 +1,7 @@
 import { PeerStatus } from '@/generated/prisma/enums';
 import { prisma } from '@/src/shared/lib/prisma';
+import { ClientDTO } from '../model/types';
+import { logger } from '@/src/shared/lib/logger';
 
 export const clientRepository = {
   async createClient(name: string, description: string, tariff: number) {
@@ -39,23 +41,31 @@ export const clientRepository = {
     });
   },
 
-  async findClientsForPayment() {
-    return prisma.client.findMany({
-      where: {
-        isFree: false,
-      },
-      include: {
-        peer: {
-          where: { status: PeerStatus.ACTIVE },
-          select: {
-            id: true,
-            externalId: true,
-            status: true,
-            server: true,
+  async findClientsForPayment(): Promise<ClientDTO[]> {
+    try {
+      const clients = await prisma.client.findMany({
+        where: {
+          isFree: false,
+        },
+        include: {
+          peer: {
+            where: { status: PeerStatus.ACTIVE },
+            select: {
+              id: true,
+              externalId: true,
+              status: true,
+              server: true,
+            },
           },
         },
-      },
-    });
+      });
+
+      logger.debug(`[CLIENT_REPO] Found ${clients.length} clients for payment`);
+      return clients;
+    } catch (error) {
+      logger.error('[CLIENT_REPO] Failed to fetch clients for payment', error);
+      throw error;
+    }
   },
 
   async deleteClient(clientId: number) {

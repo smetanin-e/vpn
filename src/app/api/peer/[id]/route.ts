@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { getUserSession } from '@/src/features/auth/actions/get-user-session';
 import { peerRepository } from '@/src/entities/peer/repository/peer.repository';
+import { handleApiError } from '@/src/shared/lib/api-error-handler';
+import { NotFoundError, UnauthorizedError } from '@/src/shared/lib/errors/app-error';
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getUserSession();
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized — user not found' }, { status: 401 });
+      throw new UnauthorizedError();
     }
 
     const dbPeerId = Number((await params).id);
@@ -15,12 +17,11 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const peer = await peerRepository.findPeerByIdWithRelations(dbPeerId);
 
     if (!peer) {
-      return NextResponse.json({ error: 'Peer not found' }, { status: 404 });
+      throw new NotFoundError('Peer не найден');
     }
 
     return NextResponse.json(peer);
   } catch (error) {
-    console.error('[API_PEER_[id]_GET]', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return handleApiError(error);
   }
 }

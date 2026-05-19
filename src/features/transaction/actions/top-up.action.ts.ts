@@ -5,6 +5,9 @@ import { clientRepository } from '@/src/entities/client/repository/client.reposi
 import { transactionRepository } from '@/src/entities/transaction/repository/transaction-repository';
 import { createPeerApi } from '../../peer/api/create-peer-api';
 import { peerRepository } from '@/src/entities/peer/repository/peer.repository';
+import { NotFoundError, ValidationError } from '@/src/shared/lib/errors/app-error';
+import { logger } from '@/src/shared/lib/logger';
+import { handleActionError } from '@/src/shared/lib/action-error-handler';
 
 type CreditBalanceData = {
   clientId: number;
@@ -15,10 +18,10 @@ export async function topUpAction(data: CreditBalanceData) {
   try {
     const client = await clientRepository.findClienWithRelations(data.clientId);
     if (!client) {
-      return { success: false, message: 'Клиент не найден' };
+      throw new NotFoundError('Клиент не найден');
     }
     if (data.key !== process.env.CREDIT_BALANCE_SECRET) {
-      return { success: false, message: 'Неверный секретный ключ' };
+      throw new ValidationError('Неверный секретный ключ');
     }
     const newBalance = client.balance + parseInt(data.count);
     await clientRepository.updateBalance(data.clientId, newBalance);
@@ -38,7 +41,7 @@ export async function topUpAction(data: CreditBalanceData) {
 
     return { success: true };
   } catch (error) {
-    console.error('Error [CREDIT_BALANCE_ACTION]', error);
-    return { success: false, message: 'Ошибка при пополнении баланса' };
+    logger.error(`[CREDIT_BALANCE_ACTION] Server error`, error);
+    return handleActionError(error);
   }
 }

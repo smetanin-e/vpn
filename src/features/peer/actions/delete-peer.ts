@@ -5,35 +5,65 @@ import { createPeerApi } from '../api/create-peer-api';
 import { transactionRepository } from '@/src/entities/transaction/repository/transaction-repository';
 import { clientRepository } from '@/src/entities/client/repository/client.repository';
 import { serverRepository } from '@/src/entities/server/repository/server.repository';
+import { AppError, NotFoundError } from '@/src/shared/lib/errors/app-error';
+import { logger } from '@/src/shared/lib/logger';
+import { handleActionError } from '@/src/shared/lib/action-error-handler';
 
 export async function deletePeerAction(dbPeerId: number) {
   try {
     const peer = await peerRepository.findPeerById(dbPeerId);
     if (!peer) {
-      return { success: false, message: 'Конфигурация не найдена' };
+      throw new NotFoundError('Пир не найден');
     }
 
     const client = await clientRepository.findClientById(peer.clientId);
     if (!client) {
-      return { success: false, message: 'Клиент не найден' };
+      throw new NotFoundError('Клиент не найден');
     }
 
     const server = await serverRepository.findById(peer.serverId);
     if (!server) {
-      return { success: false, message: 'Сервер не найден' };
+      throw new NotFoundError('Сервер не найден');
     }
+
+    logger.info(`[DELETE_PEER] Начинаем удаление пира ${dbPeerId}`, {
+      peerId: dbPeerId,
+      externalId: peer.externalId,
+      clientId: client.id,
+      clientName: client.name,
+      serverId: server.id,
+    });
 
     const peerApiInstance = createPeerApi(server);
 
     await peerApiInstance.delete(peer.externalId);
-    //TODO Если база не доступна, то пир удалится на сервере, но останется в базе. Нужно как-то обрабатывать такие ситуации.
-    await peerRepository.deletePeer(peer.id);
-    await transactionRepository.deleteByClientId(client.id);
-    await clientRepository.deleteClient(client.id);
 
+    logger.info(`[DELETE_PEER] VPN ClientID: ${peer.clientId} удален на сервере`);
+
+    try {
+      await Promise.all([
+        peerRepository.deletePeer(peer.id),
+        transactionRepository.deleteByClientId(client.id),
+        clientRepository.deleteClient(client.id),
+      ]);
+    } catch (dbError) {
+      //TODO Создать обработчик для синхронизации пиров в БД
+      logger.error(`[DELETE_PEER] КРИТИЧЕСКАЯ ОШИБКА: Пир удален на сервере, но не в БД`, {
+        peerId: dbPeerId,
+        externalId: peer.externalId,
+        clientId: client.id,
+        error: dbError instanceof Error ? dbError.message : 'Unknown',
+      });
+      throw new AppError(
+        'Пир удален на сервере, но произошла ошибка при обновлении базы данных.',
+        500,
+        'DB_CLEANUP_NEEDED',
+      );
+    }
+    logger.info(`[[DELETE_PEER] Пир успешно удален`);
     return { success: true };
   } catch (error) {
-    console.error('[DELETE_PEER] Server error', error);
-    return { success: false, message: 'Ошибка удаления пира' };
+    logger.error(`[[DELETE_PEER] Server error`, error);
+    return handleActionError(error);
   }
 }

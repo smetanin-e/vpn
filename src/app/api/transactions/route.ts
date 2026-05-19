@@ -1,5 +1,8 @@
 import { transactionRepository } from '@/src/entities/transaction/repository/transaction-repository';
 import { getUserSession } from '@/src/features/auth/actions/get-user-session';
+import { handleApiError } from '@/src/shared/lib/api-error-handler';
+import { UnauthorizedError } from '@/src/shared/lib/errors/app-error';
+import { logger } from '@/src/shared/lib/logger';
 
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -7,7 +10,7 @@ export async function GET(req: NextRequest) {
   try {
     const user = await getUserSession();
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized — user not found' }, { status: 401 });
+      throw new UnauthorizedError();
     }
 
     const { searchParams } = new URL(req.url);
@@ -24,7 +27,7 @@ export async function GET(req: NextRequest) {
     const transactions = await transactionRepository.getAll(search, take, skip, clientId);
     return NextResponse.json(transactions);
   } catch (error) {
-    console.error('[API_GET_TRANSACTION] Server error', error);
-    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+    logger.error(`[API_GET_TRANSACTION] Request failed`, error);
+    return handleApiError(error);
   }
 }

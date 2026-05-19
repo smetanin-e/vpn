@@ -1,16 +1,29 @@
 'use server';
 
 import { clientRepository } from '@/src/entities/client/repository/client.repository';
+import { handleActionError } from '@/src/shared/lib/action-error-handler';
 import { generateAccessToken, hashToken } from '@/src/shared/lib/auth/password-utils';
+import { logger } from '@/src/shared/lib/logger';
 
-export async function generateClientAccess(clientId: number) {
-  const { tokenId, secret, fullToken } = generateAccessToken();
-  const hash = await hashToken(secret);
-  const host = process.env.HOST || 'http://localhost:3000';
+type GenerateClientAccessResult = {
+  success: boolean;
+  accessLink?: string;
+};
 
-  await clientRepository.updateToken(clientId, tokenId, hash);
+export async function generateClientAccess(clientId: number): Promise<GenerateClientAccessResult> {
+  try {
+    const { tokenId, secret, fullToken } = generateAccessToken();
+    const hash = await hashToken(secret);
+    const host = process.env.HOST || 'http://localhost:3000';
 
-  return {
-    accessLink: `${host}/client/${fullToken}`,
-  };
+    await clientRepository.updateToken(clientId, tokenId, hash);
+
+    return {
+      success: true,
+      accessLink: `${host}/client/${fullToken}`,
+    };
+  } catch (error) {
+    logger.error(`[GENERATE_CLIENT_TOKEN] Failed for client ${clientId}`, error);
+    return handleActionError(error);
+  }
 }

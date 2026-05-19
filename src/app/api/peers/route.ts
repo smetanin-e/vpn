@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserSession } from '@/src/features/auth/actions/get-user-session';
 import { peerRepository } from '@/src/entities/peer/repository/peer.repository';
+import { UnauthorizedError } from '@/src/shared/lib/errors/app-error';
+import { handleApiError } from '@/src/shared/lib/api-error-handler';
+import { logger } from '@/src/shared/lib/logger';
 
 type SortField = 'balance' | 'lastHandshake' | 'sentBytes';
 type SortOrder = 'asc' | 'desc';
@@ -10,7 +13,7 @@ export async function GET(req: NextRequest) {
     // 1. Проверка сессии пользователя — вместо статического токена
     const user = await getUserSession();
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized — user not found' }, { status: 401 });
+      throw new UnauthorizedError();
     }
 
     // 2. Парсинг параметров
@@ -47,7 +50,7 @@ export async function GET(req: NextRequest) {
     );
     return NextResponse.json(peers);
   } catch (error) {
-    console.error('[API_PEER_GET]', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    logger.error(`[API_PEER_GET] Request failed`, error);
+    return handleApiError(error);
   }
 }

@@ -5,12 +5,15 @@ import { PeerStatus } from '@/generated/prisma/enums';
 import { createPeerApi } from '../api/create-peer-api';
 import { peerRepository } from '@/src/entities/peer/repository/peer.repository';
 import { serverRepository } from '@/src/entities/server/repository/server.repository';
+import { NotFoundError } from '@/src/shared/lib/errors/app-error';
+import { logger } from '@/src/shared/lib/logger';
+import { handleActionError } from '@/src/shared/lib/action-error-handler';
 
 export async function togglePeerStatusAction(dbPeerId: number) {
   try {
     const peer = await peerRepository.findPeerById(dbPeerId);
     if (!peer) {
-      return { success: false, message: 'Конфигурация не найдена' };
+      throw new NotFoundError('Пир не найден');
     }
 
     const currentStatus = peer.status;
@@ -30,7 +33,7 @@ export async function togglePeerStatusAction(dbPeerId: number) {
 
     return { success: true };
   } catch (error) {
-    console.error('[TOGGLE_STATUS_PEER] Server error', error);
-    return { success: false, message: 'Ошибка изменения статуса' };
+    logger.error(`[TOGGLE_STATUS_PEER] Server error`, error);
+    return handleActionError(error);
   }
 }
