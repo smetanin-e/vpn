@@ -4,17 +4,17 @@ WORKDIR /app
 
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 
-RUN npm install -g pnpm
+RUN npm install -g pnpm@9
 
 # ---- Dependencies ----
 FROM base AS deps
 
 COPY package.json pnpm-lock.yaml ./
-# Принудительно запускаем с одобрением всех скриптов
-RUN pnpm install --frozen-lockfile || true && \
-    echo "auto-agree-to-builds=true" > .pnpmrc && \
-    echo "ignore-scripts=false" >> .pnpmrc && \
-    pnpm rebuild @prisma/engines bcrypt prisma
+
+RUN pnpm config set ignore-scripts false && \
+    pnpm config set unsafe-perm true
+
+RUN pnpm install --frozen-lockfile
 
 # ---- Builder ----
 FROM base AS builder
