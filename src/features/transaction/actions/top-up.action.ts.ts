@@ -39,7 +39,7 @@ export async function topUpAction(data: CreditBalanceData) {
       await peerRepository.updatePeerStatus(client.peer.id, true);
     }
 
-    return { success: true };
+    return { success: true, message: 'Баланс пополнен' };
   } catch (error) {
     logger.error(`[CREDIT_BALANCE_ACTION] Server error`, error);
     return handleActionError(error);

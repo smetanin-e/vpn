@@ -28,7 +28,7 @@ export const changeUserPasswordAction = async (userId: number, formData: ChangeP
 
     await userRepository.updatePassword(user.id, hashedPassword, salt);
 
-    return { success: true };
+    return { success: true, message: 'Пароль успешно изменен' };
   } catch (error) {
     logger.error(`[CHANGE_USER_PASSWORD] Server error`, error);
     return handleActionError(error);

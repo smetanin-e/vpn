@@ -6,7 +6,7 @@ import { AppError, UnauthorizedError } from './errors/app-error';
 type ActionResult<T = any> = {
   success: boolean;
   data?: T;
-  error?: string;
+  message: string;
   code?: string;
 };
 
@@ -26,7 +26,7 @@ export async function handleActionError<T>(
 
     return {
       success: false,
-      error: error.message,
+      message: error.message,
       code: error.code,
     };
   }
@@ -37,7 +37,7 @@ export async function handleActionError<T>(
     if (error.code === 'P2002') {
       return {
         success: false,
-        error: 'Запись с такими данными уже существует',
+        message: 'Запись с такими данными уже существует',
         code: 'DUPLICATE_ERROR',
       };
     }
@@ -46,7 +46,7 @@ export async function handleActionError<T>(
   // Неизвестная ошибка
   return {
     success: false,
-    error: 'Произошла ошибка при выполнении операции',
+    message: 'Произошла ошибка при выполнении операции',
     code: 'UNKNOWN_ERROR',
   };
 }

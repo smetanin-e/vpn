@@ -61,7 +61,7 @@ export async function deletePeerAction(dbPeerId: number) {
       );
     }
     logger.info(`[[DELETE_PEER] Пир успешно удален`);
-    return { success: true };
+    return { success: true, message: 'Пир успешно удален' };
   } catch (error) {
     logger.error(`[[DELETE_PEER] Server error`, error);
     return handleActionError(error);

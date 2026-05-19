@@ -24,7 +24,7 @@ export async function toggleFreeModeAction(dbPeerId: number) {
 
     await clientRepository.updateFreeMode(peer.clientId, !currentMode);
 
-    return { success: true };
+    return { success: true, message: 'Статус тарифа успешно изменен' };
   } catch (error) {
     logger.error(`[TOGGLE_FREE_MODE] Server error`, error);
     return handleActionError(error);

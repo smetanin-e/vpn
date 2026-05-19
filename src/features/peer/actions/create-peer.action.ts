@@ -93,6 +93,7 @@ export async function createPeerAction(data: CreatePeerData) {
         logger.info(`Rollback: peer ${createdPeerId} удалён`);
       } catch (deleteError) {
         logger.error(`[ROLLBACK FAILED] Не удалось удалить peer ${createdPeerId}:`, deleteError);
+        return handleActionError(error);
       }
     }
 
@@ -106,6 +107,7 @@ export async function createPeerAction(data: CreatePeerData) {
           `[ROLLBACK FAILED] Не удалось удалить клиента ${createdClientId}:`,
           deleteError,
         );
+        handleActionError(error);
       }
     }
     logger.error(`[CREATE_PEER_ACTION] Action failed`, error);

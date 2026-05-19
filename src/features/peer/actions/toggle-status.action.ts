@@ -21,7 +21,7 @@ export async function togglePeerStatusAction(dbPeerId: number) {
 
     const server = await serverRepository.findById(peer.serverId);
     if (!server) {
-      return { success: false, message: 'Сервер не найден' };
+      throw new NotFoundError('Сервер не найден');
     }
 
     const peerApiInstance = createPeerApi(server);
@@ -31,7 +31,7 @@ export async function togglePeerStatusAction(dbPeerId: number) {
     //обновляем БД
     await peerRepository.updatePeerStatus(peer.id, !isDeactivating);
 
-    return { success: true };
+    return { success: true, message: 'Статус изменен' };
   } catch (error) {
     logger.error(`[TOGGLE_STATUS_PEER] Server error`, error);
     return handleActionError(error);
