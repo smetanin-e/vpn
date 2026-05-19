@@ -1,20 +1,22 @@
 # ---- Base ----
-FROM node:22-slim AS base
+FROM node:22-alpine AS base
 WORKDIR /app
 
 ENV NODE_OPTIONS="--max-old-space-size=2048"
+ENV CI=1
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 
-RUN npm install -g pnpm@9
+# Включаем corepack для работы с pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # ---- Dependencies ----
 FROM base AS deps
+# Для некоторых нативных зависимостей (node-gyp) в Alpine может потребоваться libc6-compat
+RUN apk add --no-cache libc6-compat
 
 COPY package.json pnpm-lock.yaml ./
-
-RUN pnpm config set ignore-scripts false && \
-    pnpm config set unsafe-perm true
-
-RUN pnpm install --frozen-lockfile
+# Флаг --aggregate-output делает логи чище в CI
+RUN pnpm install --frozen-lockfile --aggregate-output
 
 # ---- Builder ----
 FROM base AS builder
@@ -23,37 +25,37 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Генерируем Prisma Client
+# Генерируем Prisma Client (если используется)
 RUN pnpm prisma generate
 
-# Собираем приложение
+# Собираем приложение (Next.js создаст папку .next/standalone)
 RUN pnpm build
 
 # ---- Runner ----
-FROM base AS runner
-
+FROM node:22-alpine AS runner
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    openssl \
-    && rm -rf /var/lib/apt/lists/*
+# Исправлено: используем apk вместо apt-get для установки openssl
+RUN apk add --no-cache openssl dirent
 
 RUN addgroup --system --gid 1001 nodejs \
-  && adduser --system --uid 1001 nextjs
+    && adduser --system --uid 1001 nextjs
 
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/.next ./.next
+# Настройка окружения для продакшена
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Копируем только то, что сгенерировал режим standalone (весит в 10 раз меньше)
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
-
-# Права доступа
-RUN chown -R nextjs:nodejs /app
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
 EXPOSE 3000
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
 
-CMD pnpm start
+# В режиме standalone приложение запускается напрямую через node, pnpm на проде больше не нужен!
+CMD ["node", "server.js"]
