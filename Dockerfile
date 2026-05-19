@@ -2,6 +2,8 @@
 FROM node:22-slim AS base
 WORKDIR /app
 
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+
 RUN npm install -g pnpm
 
 # ---- Dependencies ----
