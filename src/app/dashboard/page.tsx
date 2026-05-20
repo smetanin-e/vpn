@@ -1,6 +1,7 @@
 import { ServerStats } from '@/src/entities/server/ui/server-stats';
 import { getUserSession } from '@/src/features/auth/actions/get-user-session';
 import { Header } from '@/src/shared/components';
+import { EsmetLogo } from '@/src/shared/components/esmet-logo';
 import { Peers } from '@/src/widgets/peers/peers';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
