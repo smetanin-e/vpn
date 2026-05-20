@@ -21,7 +21,7 @@ export const AuthModal: React.FC<Props> = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className='w-50' variant={'outline'}>
+        <Button className='w-50'>
           <LogIn className='h-4 w-4' />
           Войти
         </Button>
