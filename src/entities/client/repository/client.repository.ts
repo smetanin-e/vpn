@@ -46,10 +46,17 @@ export const clientRepository = {
       const clients = await prisma.client.findMany({
         where: {
           isFree: false,
+          balance: {
+            gt: 0,
+          },
+          peer: {
+            // ✅ обязательно наличие пира
+            isNot: null,
+          },
         },
         include: {
           peer: {
-            where: { status: PeerStatus.ACTIVE },
+            where: { status: PeerStatus.ACTIVE }, // ✅ только активные пиры
             select: {
               id: true,
               externalId: true,
@@ -60,8 +67,11 @@ export const clientRepository = {
         },
       });
 
-      logger.debug(`[CLIENT_REPO] Found ${clients.length} clients for payment`);
-      return clients;
+      // Фильтруем клиентов, у которых нет активного пира
+      const validClients = clients.filter((client) => client.peer !== null);
+
+      logger.debug(`[CLIENT_REPO] Found ${validClients.length} clients for payment`);
+      return validClients;
     } catch (error) {
       logger.error('[CLIENT_REPO] Failed to fetch clients for payment', error);
       throw error;

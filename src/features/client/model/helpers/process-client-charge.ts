@@ -26,7 +26,7 @@ export async function processClientCharge(client: ClientDTO): Promise<ClientChar
     return {
       success: false,
       clientId,
-      error: 'Prre not found',
+      error: 'Peer not found',
       timestamp: new Date().toISOString(),
     };
   }

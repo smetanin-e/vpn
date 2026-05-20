@@ -87,7 +87,36 @@ model BalanceTransaction {
     createdAt DateTime @default(now())
 }
 
+model DailyChargeLog {
+    id   Int      @id @default(autoincrement())
+    date DateTime @unique @map("date")
+
+    //Статистика
+    totalClients    Int @default(0) // Всего клиентов в обработке
+    successfulCount Int @default(0) // Успешно списано
+    failedCount     Int @default(0) // Ошибок списания
+
+    // Суммы
+    totalAmount  Int @default(0) // Общая сумма списаний (рублях)
+    totalBalance Int @default(0) // Общий остаток баланса после списания
+
+    // Детали (для отладки)
+    failedDetails Json? // Детали ошибок (clientId, причина)
+    disabledPeers Json? // Какие пиры были отключены
+
+    // Метаданные
+    duration  Int? // Длительность выполнения (мс)
+    status    ChargeStatus @default(PENDING) // PENDING, COMPLETED, FAILED
+    error     String? // Глобальная ошибка, если была
+    createdAt DateTime     @default(now())
+    updatedAt DateTime     @updatedAt
+
+    @@index([date])
+    @@map("daily_charge_logs")
+}
+
 //Модель для учета трафика по месяцам
+//TODO Отсутствует - (сделать в будущем)
 model PeerMonthlyStats {
     id    Int      @id @default(autoincrement())
     month DateTime
@@ -114,4 +143,10 @@ enum TransactionType {
 enum ServerType {
     WG_REST_API
     AMNEZIA_API
+}
+
+enum ChargeStatus {
+    PENDING
+    COMPLETED
+    FAILED
 }
