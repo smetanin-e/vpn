@@ -1,4 +1,4 @@
-import { dailyCharge } from '@/src/features/client/model/service/daily-charge';
+import { dailyCharge } from '@/src/features/daily-charge-logs/model/service/daily-charge';
 import { handleApiError } from '@/src/shared/lib/api-error-handler';
 import { UnauthorizedError } from '@/src/shared/lib/errors/app-error';
 import { logger } from '@/src/shared/lib/logger';
@@ -20,11 +20,7 @@ export async function GET(req: Request) {
 
     logger.info(`[CRON] Daily charge request ${requestId} completed`, result);
 
-    return NextResponse.json({
-      success: result.failed === 0,
-      requestId,
-      ...result,
-    });
+    return NextResponse.json(result);
   } catch (error) {
     logger.error(`[CRON] Daily charge request ${requestId} failed`, error);
     return handleApiError(error);

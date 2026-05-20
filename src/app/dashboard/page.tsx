@@ -15,7 +15,7 @@ export default async function Page() {
         userId={user.id}
         title='Панель управления'
         name={user.name}
-        links={<Link href={'/transaction'}>Транзакции</Link>}
+        links={<Link href={'/charges'}>Операции ежедневного списания</Link>}
       />
       <ServerStats />
 

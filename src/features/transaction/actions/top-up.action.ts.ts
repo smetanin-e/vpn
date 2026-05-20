@@ -16,7 +16,7 @@ type CreditBalanceData = {
 };
 export async function topUpAction(data: CreditBalanceData) {
   try {
-    const client = await clientRepository.findClienWithRelations(data.clientId);
+    const client = await clientRepository.findClienForTopUpBalance(data.clientId);
     if (!client) {
       throw new NotFoundError('Клиент не найден');
     }

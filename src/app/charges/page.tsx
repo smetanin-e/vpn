@@ -1,7 +1,7 @@
 import { getUserSession } from '@/src/features/auth/actions/get-user-session';
 import { Header } from '@/src/shared/components';
 import { Button } from '@/src/shared/components/ui';
-import { Transactions } from '@/src/widgets/transactions/transactions';
+import { Charges } from '@/src/widgets/charge-logs/charges';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -28,7 +28,7 @@ export default async function Page() {
         </Link>
       </div>
 
-      <Transactions />
+      <Charges />
     </div>
   );
 }

@@ -1,10 +1,11 @@
 import { TransactionType } from '@/generated/prisma/client';
 import { peerRepository } from '@/src/entities/peer/repository/peer.repository';
 import { getPeerApi } from '@/src/features/peer/api/peer-api-cache';
-import { logger } from '@/src/shared/lib/logger';
+
 import { prisma } from '@/src/shared/lib/prisma';
-import { ChargeTransactionError } from '../lib/charge-errors';
+
 import { ClientDTO } from '@/src/entities/client/model/types';
+import { logger } from '@/src/shared/lib/logger';
 
 export type ClientChargeResult = {
   success: boolean;
@@ -15,19 +16,43 @@ export type ClientChargeResult = {
   timestamp: string;
 };
 
-export async function processClientCharge(client: ClientDTO): Promise<ClientChargeResult> {
+type ProcessSuccess = {
+  success: true;
+  clientId: number;
+  newBalance: number;
+  amount: number;
+  peerId: number;
+  disabled: boolean;
+  disabledReason?: string;
+  error?: string;
+  step?: 'disable_peer'; // Может быть, если баланс обновился, но пир не отключился
+};
+
+type ProcessFailure = {
+  success: false;
+  clientId: number;
+  newBalance?: number;
+  disabled: false;
+  error: string;
+  step: 'update_balance' | 'api_call' | 'disable_peer';
+};
+
+type ProcessResult = ProcessSuccess | ProcessFailure;
+
+export async function processClientChargeWithLog(client: ClientDTO): Promise<ProcessResult> {
   const clientId = client.id;
   const tariff = client.tariff;
   const balance = client.balance;
 
   if (!client.peer || !client.peer.server) {
     logger.warn(`[CHARGE] Client ${clientId} has no peer, skipping`);
-
     return {
       success: false,
       clientId,
+      newBalance: balance,
+      disabled: false,
       error: 'Peer not found',
-      timestamp: new Date().toISOString(),
+      step: 'api_call',
     };
   }
 
@@ -35,13 +60,12 @@ export async function processClientCharge(client: ClientDTO): Promise<ClientChar
   const newBalance = balance - tariff;
 
   try {
-    // Выполняем транзакцию списания
+    // Обновляем баланс
     await prisma.$transaction([
       prisma.client.update({
         where: { id: clientId },
         data: { balance: { decrement: tariff } },
       }),
-
       prisma.balanceTransaction.create({
         data: {
           clientId,
@@ -51,35 +75,27 @@ export async function processClientCharge(client: ClientDTO): Promise<ClientChar
       }),
     ]);
 
+    // Если баланс стал нулевым или отрицательным - отключаем пир
+    let disabled = false;
+
     logger.info(
       `[CHARGE] Client ${clientId}: charged ${tariff}, ` + `balance: ${balance} → ${newBalance}`,
     );
 
-    // Если баланс стал отрицательным или нулевым - отключаем пир
-
     if (newBalance <= 0) {
-      logger.warn(`[CHARGE] Client ${clientId} balance depleted, disabling peer`);
-
       try {
         await api.changeEnable(client.peer.externalId, false);
         await peerRepository.updatePeerStatus(client.peer.id, false);
-
-        return {
-          success: true,
-          clientId,
-          newBalance,
-          wasDisabled: true,
-          timestamp: new Date().toISOString(),
-        };
+        disabled = true;
       } catch (disableError) {
         logger.error(`[CHARGE] Failed to disable peer for client ${clientId}`, disableError);
         return {
-          success: true,
+          success: false, // Баланс обновлен, но не отключен
           clientId,
           newBalance,
-          wasDisabled: false,
-          error: 'Peer disable failed',
-          timestamp: new Date().toISOString(),
+          disabled: false,
+          error: disableError instanceof Error ? disableError.message : 'Failed to disable peer',
+          step: 'disable_peer',
         };
       }
     }
@@ -87,12 +103,21 @@ export async function processClientCharge(client: ClientDTO): Promise<ClientChar
     return {
       success: true,
       clientId,
+      peerId: client.peer.id,
+      amount: tariff,
       newBalance,
-      wasDisabled: false,
-      timestamp: new Date().toISOString(),
+      disabled,
+      disabledReason: disabled ? 'Отрицательный баланс' : undefined,
     };
   } catch (error) {
     logger.error(`[CHARGE] Transaction failed for client ${clientId}`, error);
-    throw new ChargeTransactionError(clientId, error as Error);
+    return {
+      success: false,
+      clientId,
+      newBalance,
+      disabled: false,
+      error: error instanceof Error ? error.message : 'Transaction failed',
+      step: 'update_balance',
+    };
   }
 }

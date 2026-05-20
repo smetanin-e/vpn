@@ -1,35 +1,27 @@
 const res = {
-  total: 4,
-  successful: 3,
-  failed: 1,
-  details: [
+  id: 13,
+  date: '2026-05-20T00:00:00.000Z',
+  totalClients: 2,
+  successfulCount: 1,
+  failedCount: 1,
+  totalAmount: 5,
+  disabledPeers: [
     {
-      success: true,
-      clientId: 16,
-      newBalance: 12,
-      wasDisabled: false,
-      timestamp: '2026-05-20T09:30:13.669Z',
-    },
-    {
-      success: false,
-      clientId: 21,
-      error: 'Prre not found',
-      timestamp: '2026-05-20T09:30:13.368Z',
-    },
-    {
-      success: true,
-      clientId: 14,
-      newBalance: 2,
-      wasDisabled: false,
-      timestamp: '2026-05-20T09:30:13.933Z',
-    },
-    {
-      success: true,
+      peerId: 6,
+      reason: 'Negative balance',
       clientId: 13,
-      newBalance: 22,
-      wasDisabled: false,
-      timestamp: '2026-05-20T09:30:13.953Z',
+      newBalance: -1,
     },
   ],
-  duration: 1195,
+  failedDetails: [
+    {
+      step: 'disable_peer',
+      error: 'connect ECONNREFUSED 87.58.216.13:3010',
+      clientId: 21,
+    },
+  ],
+  status: 'COMPLETED',
+  error: null,
+  createdAt: '2026-05-20T13:55:23.479Z',
+  updatedAt: '2026-05-20T13:55:23.479Z',
 };

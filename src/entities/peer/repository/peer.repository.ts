@@ -36,6 +36,7 @@ type OrderBy = {
   sentBytes?: SortOrder;
   lastHandshake?: SortOrder;
   client?: { balance: SortOrder };
+  createdAt?: SortOrder;
 };
 
 export const peerRepository = {
@@ -70,6 +71,9 @@ export const peerRepository = {
         break;
       case 'lastHandshake':
         orderBy = { lastHandshake: sortOrder };
+        break;
+      case 'created':
+        orderBy = { createdAt: sortOrder };
         break;
       case 'balance':
         // Для сортировки по balance нужно сортировать связанную таблицу client

@@ -5,7 +5,7 @@ import { UnauthorizedError } from '@/src/shared/lib/errors/app-error';
 import { handleApiError } from '@/src/shared/lib/api-error-handler';
 import { logger } from '@/src/shared/lib/logger';
 
-type SortField = 'balance' | 'lastHandshake' | 'sentBytes';
+type SortField = 'balance' | 'lastHandshake' | 'sentBytes' | 'created';
 type SortOrder = 'asc' | 'desc';
 
 export async function GET(req: NextRequest) {
@@ -29,7 +29,8 @@ export async function GET(req: NextRequest) {
     if (
       rawSortField === 'balance' ||
       rawSortField === 'lastHandshake' ||
-      rawSortField === 'sentBytes'
+      rawSortField === 'sentBytes' ||
+      rawSortField === 'created'
     ) {
       sortField = rawSortField;
     }

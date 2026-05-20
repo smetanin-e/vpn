@@ -52,7 +52,7 @@ export async function createDailyChargeLog(
       totalClients: stats.total,
       successfulCount: stats.successful,
       failedCount: stats.failed,
-      totalAmount, // ✅ number
+      totalAmount,
       totalBalance: results.reduce((sum, r) => sum + (r.newBalance || 0), 0),
       failedDetails: failedDetailsJson as any,
       disabledPeers: disabledPeersJson as any,

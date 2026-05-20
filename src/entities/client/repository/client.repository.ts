@@ -1,6 +1,6 @@
 import { PeerStatus } from '@/generated/prisma/enums';
 import { prisma } from '@/src/shared/lib/prisma';
-import { ClientDTO } from '../model/types';
+import { ClientDTO, ClientQueryType } from '../model/types';
 import { logger } from '@/src/shared/lib/logger';
 
 export const clientRepository = {
@@ -20,7 +20,7 @@ export const clientRepository = {
     });
   },
 
-  async findClienWithRelations(clientId: number) {
+  async findClienForTopUpBalance(clientId: number) {
     return prisma.client.findFirst({
       where: { id: clientId },
       select: {
@@ -41,14 +41,29 @@ export const clientRepository = {
     });
   },
 
+  async findClienWithRelations(clientId: number): Promise<ClientQueryType | null> {
+    return prisma.client.findFirst({
+      where: { id: clientId },
+      include: {
+        peer: {
+          include: {
+            server: {
+              select: {
+                name: true,
+                type: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  },
+
   async findClientsForPayment(): Promise<ClientDTO[]> {
     try {
       const clients = await prisma.client.findMany({
         where: {
           isFree: false,
-          balance: {
-            gt: 0,
-          },
           peer: {
             // ✅ обязательно наличие пира
             isNot: null,

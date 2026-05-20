@@ -9,26 +9,25 @@ export async function GET(req: NextRequest) {
   try {
     const user = await getUserSession();
     if (!user) {
-      throw new UnauthorizedError('Доступ только для администраторов');
+      throw new UnauthorizedError('Доступ запрещен');
     }
 
     const { searchParams } = new URL(req.url);
-    const limit = parseInt(searchParams.get('limit') || '30', 10);
-    const offset = parseInt(searchParams.get('offset') || '0', 10);
+    const take = parseInt(searchParams.get('take') || '10', 10);
+    const skip = parseInt(searchParams.get('skip') || '0', 10);
 
-    const [logs, total] = await Promise.all([
+    const [charges, total] = await Promise.all([
       prisma.dailyChargeLog.findMany({
+        take,
+        skip,
         orderBy: { date: 'desc' },
-        skip: offset,
-        take: limit,
       }),
       prisma.dailyChargeLog.count(),
     ]);
 
     return NextResponse.json({
-      success: true,
-      data: logs,
-      meta: { total, limit, offset },
+      data: charges,
+      total,
     });
   } catch (error) {
     logger.error('[DAILY_CHARGE_LOGS] Failed', error);

@@ -49,7 +49,7 @@ export function PeerCard({ peer }: { peer: PeerQueryType }) {
           {/* UID */}
           <div className='flex items-center gap-2 rounded py-1.5 sm:justify-start'>
             <Logo width={25} height={25} type={peer.server!.type} />
-            <Link href={`/peer/${peer.id}`}>
+            <Link href={`/client/id/${peer.client.id}`}>
               <span className='text-lg text-muted-foreground'>Client ID: </span>
 
               <code className='truncate font-mono text-lg'>{peer.client.id}</code>

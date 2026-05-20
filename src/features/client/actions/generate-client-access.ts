@@ -20,7 +20,7 @@ export async function generateClientAccess(clientId: number): Promise<GenerateCl
 
     return {
       success: true,
-      accessLink: `${host}/client/${fullToken}`,
+      accessLink: `${host}/client/token/${fullToken}`,
     };
   } catch (error) {
     logger.error(`[GENERATE_CLIENT_TOKEN] Failed for client ${clientId}`, error);

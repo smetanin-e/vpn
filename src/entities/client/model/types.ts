@@ -1,4 +1,13 @@
+import { Client, Peer, Server } from '@/generated/prisma/client';
 import { PeerStatus, ServerType } from '@/generated/prisma/enums';
+
+export type ClientQueryType = Omit<Client, 'accessTokenHash'> & {
+  peer:
+    | (Peer & {
+        server: Pick<Server, 'name' | 'type'> | null;
+      })
+    | null;
+};
 
 export type ClientDTO = {
   id: number;

@@ -87,31 +87,53 @@ model BalanceTransaction {
     createdAt DateTime @default(now())
 }
 
+// model DailyChargeLog {
+//     id   Int      @id @default(autoincrement())
+//     date DateTime @unique @map("date")
+
+//     //Статистика
+//     totalClients    Int @default(0) // Всего клиентов в обработке
+//     successfulCount Int @default(0) // Успешно списано
+//     failedCount     Int @default(0) // Ошибок списания
+
+//     // Суммы
+//     totalAmount  Int @default(0) // Общая сумма списаний (рублях)
+//     totalBalance Int @default(0) // Общий остаток баланса после списания
+
+//     // Детали (для отладки)
+//     failedDetails Json? // Детали ошибок (clientId, причина)
+//     disabledPeers Json? // Какие пиры были отключены
+
+//     // Метаданные
+//     duration  Int? // Длительность выполнения (мс)
+//     status    ChargeStatus @default(PENDING) // PENDING, COMPLETED, FAILED
+//     error     String? // Глобальная ошибка, если была
+//     createdAt DateTime     @default(now())
+//     updatedAt DateTime     @updatedAt
+
+//     @@index([date])
+//     @@map("daily_charge_logs")
+// }
+
 model DailyChargeLog {
     id   Int      @id @default(autoincrement())
-    date DateTime @unique @map("date")
+    date DateTime @unique
 
-    //Статистика
-    totalClients    Int @default(0) // Всего клиентов в обработке
-    successfulCount Int @default(0) // Успешно списано
-    failedCount     Int @default(0) // Ошибок списания
+    totalClients    Int @default(0)
+    successfulCount Int @default(0)
+    failedCount     Int @default(0)
 
-    // Суммы
-    totalAmount  Int @default(0) // Общая сумма списаний (рублях)
-    totalBalance Int @default(0) // Общий остаток баланса после списания
+    totalAmount Int @default(0)
 
-    // Детали (для отладки)
-    failedDetails Json? // Детали ошибок (clientId, причина)
-    disabledPeers Json? // Какие пиры были отключены
+    disabledPeers Json?
+    failedDetails Json?
 
-    // Метаданные
-    duration  Int? // Длительность выполнения (мс)
-    status    ChargeStatus @default(PENDING) // PENDING, COMPLETED, FAILED
-    error     String? // Глобальная ошибка, если была
-    createdAt DateTime     @default(now())
-    updatedAt DateTime     @updatedAt
+    status ChargeStatus @default(PENDING)
+    error  String?
 
-    @@index([date])
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
     @@map("daily_charge_logs")
 }
 

@@ -11,7 +11,7 @@ import {
 
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
-export type SortField = 'balance' | 'lastHandshake' | 'sentBytes';
+export type SortField = 'balance' | 'lastHandshake' | 'sentBytes' | 'created';
 export type SortOrder = 'asc' | 'desc';
 
 interface PeerSortProps {
@@ -24,6 +24,7 @@ const sortLabels: Record<SortField, string> = {
   balance: 'Баланс',
   lastHandshake: 'Последняя активность',
   sentBytes: 'Использованно трафика',
+  created: 'Дата создания',
 };
 
 export const PeerSort: React.FC<PeerSortProps> = ({
