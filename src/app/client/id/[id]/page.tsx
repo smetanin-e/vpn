@@ -1,6 +1,7 @@
 import { clientRepository } from '@/src/entities/client/repository/client.repository';
 import { ClientCard } from '@/src/entities/client/ui/client-card';
 import { ClientLink } from '@/src/entities/client/ui/client-link';
+import { СlientNotFound } from '@/src/entities/client/ui/client-not-found';
 import { Logo } from '@/src/shared/components';
 import { Button } from '@/src/shared/components/ui';
 import { Transactions } from '@/src/widgets/transactions/transactions';
@@ -15,7 +16,7 @@ export default async function PeerPage({ params }: { params: Promise<{ id: strin
 
   if (!client) {
     //TODO ДОБАВИТЬ NOTFOUND PAGE
-    return <div>Invalid link</div>;
+    return <СlientNotFound />;
   }
 
   return (

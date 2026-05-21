@@ -22,7 +22,7 @@ export const ServerStats: React.FC<Props> = ({}) => {
         <>
           {stats?.map((server) => (
             <div key={server.serverId} className='md:mb-2 mb-4 text-sm'>
-              <div className='grid md:grid-cols-[140px_220px_auto] grid-cols-[1fr_220px] items-center gap-1'>
+              <div className='grid md:grid-cols-[150px_220px_auto] grid-cols-[1fr_220px] items-center gap-1'>
                 <div className='flex items-center gap-2'>
                   <Logo width={25} height={25} type={server.serverType} />
                   <p className='text-xs md:text-sm'>{server.serverName}</p>
