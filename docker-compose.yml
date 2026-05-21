@@ -4,6 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
+        NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${NEXT_SERVER_ACTIONS_ENCRYPTION_KEY}
         HOST: ${HOST}
         DATABASE_URL: ${DATABASE_URL}
         NEXTAUTH_URL: ${NEXTAUTH_URL}
@@ -19,6 +20,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
+      NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${NEXT_SERVER_ACTIONS_ENCRYPTION_KEY}
       HOST: ${HOST}
       DATABASE_URL: ${DATABASE_URL}
       NEXTAUTH_URL: ${NEXTAUTH_URL}
