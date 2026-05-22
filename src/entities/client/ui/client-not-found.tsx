@@ -20,7 +20,7 @@ export const СlientNotFound: React.FC<Props> = () => {
         </Link>
       </div>
       <div className='flex grow flex-col items-center justify-center'>
-        <SearchAlert className='w-50 h-50 text-chart-4' />
+        <SearchAlert className='w-50 h-50' />
 
         <p className='text-l mb-8 max-w-xl p-2 text-center text-gray-300'>
           Такого клиента больше не существует

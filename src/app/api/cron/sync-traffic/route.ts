@@ -1,4 +1,5 @@
 import { syncTraffic } from '@/src/features/peer/model/service/sync-traffic';
+import { serverAxiosInstance } from '@/src/shared/api/server';
 import { handleApiError } from '@/src/shared/lib/api-error-handler';
 import { UnauthorizedError } from '@/src/shared/lib/errors/app-error';
 import { logger } from '@/src/shared/lib/logger';
@@ -18,7 +19,26 @@ export async function GET(req: Request) {
       message: 'Трафик синхронизирован',
     });
   } catch (error) {
-    logger.error('[API_CRON_SYNC_TRASFFIC] sync error', error);
+    logger.error('[[GET] API_CRON_SYNC_TRASFFIC] sync error', error);
+    return handleApiError(error);
+  }
+}
+
+//При принудительной синхронизации
+export async function POST() {
+  try {
+    await serverAxiosInstance.get('/api/cron/sync-traffic', {
+      headers: {
+        Authorization: `Bearer ${process.env.CRON_SECRET}`,
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Трафик синхронизирован',
+    });
+  } catch (error) {
+    logger.error('[[POST] API_CRON_SYNC_TRASFFIC] sync error', error);
     return handleApiError(error);
   }
 }
