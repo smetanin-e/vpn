@@ -9,7 +9,7 @@ export async function dailyCharge(): Promise<ChargeLogInput> {
   const startTime = Date.now();
   const today = new Date();
   //Костыль из-за разницы в часовых поясах
-  today.setHours(0, 0, 0, 0);
+  today.setHours(3, 0, 0, 0);
   today.setDate(today.getDate() + 1);
 
   const chargeLogInput: ChargeLogInput = {

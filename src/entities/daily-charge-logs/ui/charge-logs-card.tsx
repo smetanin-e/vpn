@@ -70,7 +70,7 @@ export function ChargeLogsCard({ data }: Props) {
           <div className='space-y-3'>
             <h4 className='flex items-center gap-2 text-sm font-medium'>
               <UserX className='h-4 w-4 text-amber-500' />
-              Отключённые пиры ({data.disabledPeers.length})
+              Отключённые клиенты ({data.disabledPeers.length})
             </h4>
             <div className='space-y-2'>
               {data.disabledPeers.map((peer) => (
@@ -105,7 +105,10 @@ export function ChargeLogsCard({ data }: Props) {
                   key={index}
                   className='flex flex-col gap-1 border border-red-200 bg-red-50 p-3 dark:border-red-900/50 dark:bg-red-950/20'
                 >
-                  <span className='text-sm font-medium'>ClientID:{detail.clientId}</span>
+                  <Link href={`/client/id/${detail.clientId}`}>
+                    {' '}
+                    <span className='text-sm font-medium'>ClientID:{detail.clientId}</span>
+                  </Link>
 
                   <p className='break-all font-mono text-xs text-destructive'>
                     Причина ошибки: {detail.error} ({detail.step})

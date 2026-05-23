@@ -39,6 +39,16 @@ type OrderBy = {
   createdAt?: SortOrder;
 };
 
+interface GetAllPeersFilteredParams {
+  search?: string;
+  take?: number;
+  skip?: number;
+  sortField?: SortField;
+  sortOrder?: SortOrder;
+  serverIds?: number[];
+  isFree?: boolean; // true - бесплатные, false - платные, undefined - все
+}
+
 export const peerRepository = {
   async createPeerDb(
     clientId: number,
@@ -57,13 +67,17 @@ export const peerRepository = {
       },
     });
   },
-  async getAllPeersFiltered(
-    search: string,
-    take?: number,
-    skip?: number,
-    sortField: SortField = 'lastHandshake',
-    sortOrder: SortOrder = 'desc',
-  ): Promise<PeerQueryType[]> {
+  async getAllPeersFiltered(params: GetAllPeersFilteredParams): Promise<PeerQueryType[]> {
+    const {
+      search = '',
+      take,
+      skip,
+      sortField = 'lastHandshake',
+      sortOrder = 'desc',
+      serverIds,
+      isFree,
+    } = params;
+
     let orderBy: OrderBy = {};
     switch (sortField) {
       case 'sentBytes':
@@ -111,6 +125,20 @@ export const peerRepository = {
         orConditions.unshift({ clientId: numericSearch });
       }
       where.OR = orConditions;
+    }
+
+    // Фильтрация по серверам
+    if (serverIds && serverIds.length > 0) {
+      where.serverId = {
+        in: serverIds,
+      };
+    }
+
+    // Фильтрация по платно/бесплатно
+    if (isFree !== undefined) {
+      where.client = {
+        isFree: isFree,
+      };
     }
 
     const peers = await prisma.peer.findMany({

@@ -45,12 +45,12 @@ export const PeerSort: React.FC<PeerSortProps> = ({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant='outline' className='w-full gap-1 md:max-w-sm'>
+        <Button variant='outline' size={'icon'}>
           <ArrowUpDown className='h-3.5 w-3.5' />
-          Сортировка: {sortLabels[sortField]} ({sortOrder === 'asc' ? '↑' : '↓'})
+          {/* Сортировка: {sortLabels[sortField]} ({sortOrder === 'asc' ? '↑' : '↓'}) */}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align='end'>
+      <DropdownMenuContent align='end' className='min-w-75'>
         {Object.entries(sortLabels).map(([field, label]) => (
           <DropdownMenuItem
             key={field}

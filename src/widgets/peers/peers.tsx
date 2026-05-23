@@ -11,6 +11,7 @@ import { SearchPeer } from '@/src/entities/peer/ui/search-peer';
 import { useGetPeers } from '@/src/entities/peer/model/hooks/use-get-peers';
 import { PeerCard } from '@/src/entities/peer/ui/peer-card';
 import { CreateServerModal } from '@/src/features/server/ui/create-server-modal';
+import { FilterPeersModal, FiltersState } from '@/src/features/peer/ui/filter-peers-modal';
 
 interface Props {
   className?: string;
@@ -23,27 +24,20 @@ export const Peers: React.FC<Props> = () => {
   // Состояния сортировки
   const [sortField, setSortField] = React.useState<SortField>('sentBytes');
   const [sortOrder, setSortOrder] = React.useState<SortOrder>('desc');
+  const [filters, setFilters] = React.useState<FiltersState>({
+    serverIds: [],
+    isFree: null,
+  });
 
   const { data, status, error, hasNextPage, fetchNextPage, isFetchingNextPage } = useGetPeers(
     searchValue,
     sortField,
     sortOrder,
+    filters.serverIds,
+    filters.isFree,
   );
 
-  const peers = React.useMemo(() => {
-    if (!data?.pages) return [];
-
-    const uniqueMap = new Map();
-    data.pages.forEach((page) => {
-      page.peers.forEach((peer) => {
-        if (!uniqueMap.has(peer.id)) {
-          uniqueMap.set(peer.id, peer);
-        }
-      });
-    });
-
-    return Array.from(uniqueMap.values());
-  }, [data]);
+  const peers = data?.pages.flatMap((page) => page.peers) ?? [];
 
   const handleSort = (field: SortField, order: SortOrder) => {
     setSortField(field);
@@ -57,6 +51,7 @@ export const Peers: React.FC<Props> = () => {
       </div>
     );
   }
+
   return (
     <Card
       className={cn(
@@ -64,7 +59,7 @@ export const Peers: React.FC<Props> = () => {
       )}
     >
       <CardHeader>
-        <CardTitle className='flex justify-between'>
+        <CardTitle className='flex justify-between gap-2'>
           <h2>Профили клиентов</h2>
           <div className='flex flex-col items-end gap-2'>
             <CreateServerModal />
@@ -79,8 +74,9 @@ export const Peers: React.FC<Props> = () => {
             setSearchValue={setSearchValue}
             searchParams={searchParams}
           />
-          <div className='text-right'>
+          <div className='flex justify-end gap-2'>
             <PeerSort sortField={sortField} sortOrder={sortOrder} onSort={handleSort} />
+            <FilterPeersModal filters={filters} onFiltersChange={setFilters} />
           </div>
         </div>
       </CardHeader>

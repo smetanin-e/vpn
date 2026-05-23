@@ -7,6 +7,7 @@ export { Badge } from './badge';
 export { Label } from './label';
 export { Textarea } from './textarea';
 export { Spinner } from './spinner';
+export { Checkbox } from './checkbox';
 export * from './dialog';
 export * from './select';
 export * from './popover';

@@ -8,6 +8,8 @@ interface FetchPeersParams {
   search?: string;
   sortField: string;
   sortOrder: string;
+  serverIds?: number[]; // ID выбранных серверов
+  isFree?: boolean | null; // true - только бесплатные, false - только платные, null/undefined - все
 }
 
 export const fetchPeers = async ({
@@ -15,9 +17,12 @@ export const fetchPeers = async ({
   search = '',
   sortField = 'lastActivity',
   sortOrder = 'desc',
+  serverIds,
+  isFree,
 }: FetchPeersParams): Promise<{
   peers: PeerQueryType[];
   nextPage: number | undefined;
+  total: number;
 }> => {
   try {
     const take = 20;
@@ -30,16 +35,33 @@ export const fetchPeers = async ({
     params.set('sortOrder', sortOrder);
     if (search.trim()) params.set('search', search.trim());
 
-    const { data } = await clientAxiosInstance.get<PeerQueryType[]>(`/peers?${params.toString()}`);
+    // Фильтрация по серверам (если есть выбранные)
+    if (serverIds && serverIds.length > 0) {
+      params.set('serverIds', JSON.stringify(serverIds));
+    }
+
+    //Фильтрация по типу доступа (если указан)
+    if (isFree !== undefined && isFree !== null) {
+      params.set('isFree', isFree.toString());
+    }
+
+    const { data } = await clientAxiosInstance.get<{ data: PeerQueryType[]; total: number }>(
+      `/peers?${params.toString()}`,
+    );
 
     if (!data) {
       throw new NotFoundError('Ошибка при загрузке пиров');
     }
 
-    const hasMore = data.length === take;
+    const { data: peers, total } = data;
+
+    // Определяем, есть ли следующая страница
+    const hasMore = skip + take < total;
+
     return {
-      peers: data,
+      peers,
       nextPage: hasMore ? pageParam + 1 : undefined,
+      total,
     };
   } catch (error) {
     logger.error('[fetchPeers] failed', error);

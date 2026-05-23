@@ -16,7 +16,7 @@ export const usePeerMutations = () => {
       if (res.success) {
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: ['peers'] }),
-          queryClient.invalidateQueries({ queryKey: ['stats'] }),
+          queryClient.invalidateQueries({ queryKey: ['server-stats'] }),
         ]);
         toast.success('VPN успешно создан');
       } else {
@@ -31,7 +31,7 @@ export const usePeerMutations = () => {
       if (res.success) {
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: ['peer'] }),
-          queryClient.invalidateQueries({ queryKey: ['stats'] }),
+          queryClient.invalidateQueries({ queryKey: ['server-stats'] }),
         ]);
       } else {
         toast.error(res.message || 'Ошибка при изменении статуса');
@@ -50,7 +50,7 @@ export const usePeerMutations = () => {
       if (res.success) {
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: ['peers'] }),
-          queryClient.invalidateQueries({ queryKey: ['stats'] }),
+          queryClient.invalidateQueries({ queryKey: ['server-stats'] }),
         ]);
         toast.success('VPN успешно удален');
         router.push('/dashboard');

@@ -8,7 +8,10 @@ export const useServerMutations = () => {
     mutationFn: createServerAction,
     onSuccess: async (res) => {
       if (res.success) {
-        await Promise.all([queryClient.invalidateQueries({ queryKey: ['servers'] })]);
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['server-stats'] }),
+          queryClient.invalidateQueries({ queryKey: ['serves'] }),
+        ]);
         toast.success('VPN сервер успешно добавлен');
       } else {
         toast.error(res.message || 'Ошибка при добавлении VPN сервера');
