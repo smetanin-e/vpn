@@ -7,11 +7,6 @@ import { ChargeLogInput } from '@/src/entities/daily-charge-logs/model/types.typ
 
 export async function dailyCharge(): Promise<ChargeLogInput> {
   const startTime = Date.now();
-  const today = new Date();
-  //Костыль из-за разницы в часовых поясах
-  today.setHours(3, 0, 0, 0);
-  today.setDate(today.getDate() + 1);
-
   const chargeLogInput: ChargeLogInput = {
     totalClients: 0,
     successfulCount: 0,
@@ -78,7 +73,7 @@ export async function dailyCharge(): Promise<ChargeLogInput> {
     // Создаем запись в логе (только после успешного выполнения)
     await prisma.dailyChargeLog.create({
       data: {
-        date: today,
+        date: new Date(),
         status: 'COMPLETED',
         totalClients: chargeLogInput.totalClients,
         successfulCount: chargeLogInput.successfulCount,
@@ -96,7 +91,7 @@ export async function dailyCharge(): Promise<ChargeLogInput> {
 
     await prisma.dailyChargeLog.create({
       data: {
-        date: today,
+        date: new Date(),
         status: 'FAILED',
         totalClients: chargeLogInput.totalClients,
         successfulCount: chargeLogInput.successfulCount,

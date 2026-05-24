@@ -5,7 +5,7 @@ import { Logo } from '@/src/shared/components';
 import { PeerStatus } from '@/generated/prisma/enums';
 import { cn } from '@/src/shared/lib/utils';
 
-import { PeerQueryType } from '../model/types';
+import { PeerQueryType } from '../model/types/types';
 
 import Link from 'next/link';
 import { formatTraffic } from '@/src/shared/lib/format-traffic';

@@ -1,7 +1,7 @@
 import { Server, ServerType } from '@/generated/prisma/client';
 import { createAmneziaApiAdapter } from './amnezia/create-amnezia-api.adapter';
 import { createWgRestApiAdapter } from './wireguard/create-wg-rest-api.adapter';
-import { TrafficData } from '@/src/entities/peer/model/types';
+import { TrafficData } from '@/src/entities/peer/model/types/types';
 import { AppError } from '@/src/shared/lib/errors/app-error';
 import { logger } from '@/src/shared/lib/logger';
 

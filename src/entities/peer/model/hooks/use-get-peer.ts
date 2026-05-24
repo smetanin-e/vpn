@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { clientAxiosInstance } from '@/src/shared/api/client';
-import { PeerQueryType } from '../types';
+import { PeerQueryType } from '../types/types';
 import { useErrorHandler } from '@/src/shared/lib/use-error-handler';
 
 export const useGetPeer = (id: number) => {

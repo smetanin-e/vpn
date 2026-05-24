@@ -3,6 +3,7 @@ import { getUserSession } from '@/src/features/auth/actions/get-user-session';
 import { handleApiError } from '@/src/shared/lib/api-error-handler';
 import { UnauthorizedError } from '@/src/shared/lib/errors/app-error';
 import { logger } from '@/src/shared/lib/logger';
+import { prisma } from '@/src/shared/lib/prisma';
 
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -24,8 +25,16 @@ export async function GET(req: NextRequest) {
       ? parseInt(searchParams.get('clientId')!, 10)
       : undefined;
 
-    const transactions = await transactionRepository.getAll(search, take, skip, clientId);
-    return NextResponse.json(transactions);
+    //const transactions = await transactionRepository.getAll(search, take, skip, clientId);
+
+    const [transactions, total] = await Promise.all([
+      await transactionRepository.getAll(search, take, skip, clientId),
+      prisma.balanceTransaction.count({ where: { clientId } }),
+    ]);
+    return NextResponse.json({
+      data: transactions,
+      total,
+    });
   } catch (error) {
     logger.error(`[API_GET_TRANSACTION] Request failed`, error);
     return handleApiError(error);

@@ -14,6 +14,7 @@ export const fetchTransactions = async ({
 }: FetchTransactionsParams): Promise<{
   transactions: TransactionDTO[];
   nextPage: number | undefined;
+  total: number;
 }> => {
   const take = 5;
   const skip = pageParam * take;
@@ -23,13 +24,17 @@ export const fetchTransactions = async ({
   if (search.trim()) params.set('search', search.trim());
   if (clientId) params.set('clientId', clientId.toString());
 
-  const { data } = await clientAxiosInstance.get<TransactionDTO[]>(
+  const { data } = await clientAxiosInstance.get<{ data: TransactionDTO[]; total: number }>(
     `/transactions?${params.toString()}`,
   );
 
-  const hasMore = data.length === take;
+  const { data: transactions, total } = data;
+
+  //определяем, есть ли следующая страница
+  const hasMore = skip + take < total;
   return {
-    transactions: data,
+    transactions,
     nextPage: hasMore ? pageParam + 1 : undefined,
+    total,
   };
 };

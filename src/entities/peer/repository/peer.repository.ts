@@ -1,8 +1,11 @@
-import { PeerStatus, Prisma } from '@/generated/prisma/client';
+import { PeerStatus } from '@/generated/prisma/client';
 import { prisma } from '@/src/shared/lib/prisma';
-import { SortField, SortOrder } from '../ui/peer-sort';
-import { PeerQueryType } from '../model/types';
+
+import { PeerQueryType } from '../model/types/types';
 import { convertPeer } from '../model/lib/convert-peer';
+import { buildPeerWhereClause } from '../model/lib/build-where-clause';
+import { buildPeerOrderBy } from '../model/lib/build-order-by';
+import { SortField, SortOrder } from '../model/types/sort.types';
 
 const basePeerSelect = {
   id: true,
@@ -30,14 +33,7 @@ const basePeerSelect = {
       accessTokenId: true,
     },
   },
-};
-
-type OrderBy = {
-  sentBytes?: SortOrder;
-  lastHandshake?: SortOrder;
-  client?: { balance: SortOrder };
-  createdAt?: SortOrder;
-};
+} as const;
 
 interface GetAllPeersFilteredParams {
   search?: string;
@@ -48,6 +44,12 @@ interface GetAllPeersFilteredParams {
   serverIds?: number[];
   isFree?: boolean; // true - бесплатные, false - платные, undefined - все
 }
+
+type CountFiltersParams = {
+  search?: string;
+  serverIds?: number[];
+  isFree?: boolean;
+};
 
 export const peerRepository = {
   async createPeerDb(
@@ -78,79 +80,22 @@ export const peerRepository = {
       isFree,
     } = params;
 
-    let orderBy: OrderBy = {};
-    switch (sortField) {
-      case 'sentBytes':
-        orderBy = { sentBytes: sortOrder };
-        break;
-      case 'lastHandshake':
-        orderBy = { lastHandshake: sortOrder };
-        break;
-      case 'created':
-        orderBy = { createdAt: sortOrder };
-        break;
-      case 'balance':
-        // Для сортировки по balance нужно сортировать связанную таблицу client
-        // Это потребует использования include или orderBy с relation
-        orderBy = { client: { balance: sortOrder } };
-        break;
-      default:
-        orderBy = { sentBytes: 'desc' };
-    }
-
-    const where: Prisma.PeerWhereInput = {};
-    if (search) {
-      const orConditions: Prisma.PeerWhereInput[] = [
-        {
-          client: {
-            name: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-        },
-
-        {
-          client: {
-            description: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-        },
-      ];
-      // Добавляем поиск по clientId, если search является числом
-      const numericSearch = Number(search);
-      if (!Number.isNaN(numericSearch)) {
-        orConditions.unshift({ clientId: numericSearch });
-      }
-      where.OR = orConditions;
-    }
-
-    // Фильтрация по серверам
-    if (serverIds && serverIds.length > 0) {
-      where.serverId = {
-        in: serverIds,
-      };
-    }
-
-    // Фильтрация по платно/бесплатно
-    if (isFree !== undefined) {
-      where.client = {
-        isFree: isFree,
-      };
-    }
-
     const peers = await prisma.peer.findMany({
-      where,
+      where: buildPeerWhereClause({ search, serverIds, isFree }),
       select: basePeerSelect,
-      orderBy,
+      orderBy: buildPeerOrderBy(sortField, sortOrder),
       take,
       skip,
     });
 
     // Конвертируем все записи
     return peers.map(convertPeer);
+  },
+
+  async getTotalCountByFilters(params: CountFiltersParams): Promise<number> {
+    return prisma.peer.count({
+      where: buildPeerWhereClause(params),
+    });
   },
 
   // Поиск пира по id из БД c клиентом и сервером
@@ -162,17 +107,6 @@ export const peerRepository = {
 
     if (!peer) return null;
     return convertPeer(peer);
-  },
-
-  // обновление статуса пира по id
-  async updatePeerStatus(peerId: number, value: boolean) {
-    const status = value ? PeerStatus.ACTIVE : PeerStatus.INACTIVE;
-    return prisma.peer.update({
-      where: { id: peerId },
-      data: {
-        status,
-      },
-    });
   },
 
   // Поиск пира по id из БД
@@ -191,6 +125,17 @@ export const peerRepository = {
     });
 
     return peer?.id;
+  },
+
+  // обновление статуса пира по id
+  async updatePeerStatus(peerId: number, value: boolean) {
+    const status = value ? PeerStatus.ACTIVE : PeerStatus.INACTIVE;
+    return prisma.peer.update({
+      where: { id: peerId },
+      data: {
+        status,
+      },
+    });
   },
 
   //Удаляем пир

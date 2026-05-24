@@ -6,7 +6,7 @@ import {
   AmneziaDeletePeerResponse,
   AmneziaPeersResponse,
 } from '../../model/types/amnezia-api.types';
-import { TrafficData } from '@/src/entities/peer/model/types';
+import { TrafficData } from '@/src/entities/peer/model/types/types';
 import { normalizeTrafficData } from '@/src/entities/peer/model/lib/normalize-traffic-data';
 
 export type AmneziaPeerApiType = {

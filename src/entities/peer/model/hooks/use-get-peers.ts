@@ -2,8 +2,8 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { useDebounce } from '@reactuses/core';
 import React from 'react';
 
-import { SortField, SortOrder } from '../../ui/peer-sort';
 import { fetchPeers } from '@/src/features/peer/api/fetch-peers';
+import { SortField, SortOrder } from '../types/sort.types';
 
 export const useGetPeers = (
   search?: string,

@@ -1,4 +1,4 @@
-import { PeerQueryType, PeerQueryTypeWithBigInt } from '../types';
+import { PeerQueryType, PeerQueryTypeWithBigInt } from '../types/types';
 
 export function convertPeer(peer: PeerQueryTypeWithBigInt): PeerQueryType {
   return {

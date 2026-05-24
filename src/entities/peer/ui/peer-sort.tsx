@@ -10,22 +10,13 @@ import {
 } from '@/src/shared/components/ui';
 
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
-
-export type SortField = 'balance' | 'lastHandshake' | 'sentBytes' | 'created';
-export type SortOrder = 'asc' | 'desc';
+import { SORT_LABELS, SortField, SortOrder } from '../model/types/sort.types';
 
 interface PeerSortProps {
   sortField: SortField;
   sortOrder: SortOrder;
   onSort: (field: SortField, order: SortOrder) => void;
 }
-
-const sortLabels: Record<SortField, string> = {
-  balance: 'Баланс',
-  lastHandshake: 'Последняя активность',
-  sentBytes: 'Использованно трафика',
-  created: 'Дата создания',
-};
 
 export const PeerSort: React.FC<PeerSortProps> = ({
   sortField = 'sentBytes', // добавлено значение по умолчанию
@@ -47,11 +38,10 @@ export const PeerSort: React.FC<PeerSortProps> = ({
       <DropdownMenuTrigger asChild>
         <Button variant='outline' size={'icon'}>
           <ArrowUpDown className='h-3.5 w-3.5' />
-          {/* Сортировка: {sortLabels[sortField]} ({sortOrder === 'asc' ? '↑' : '↓'}) */}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end' className='min-w-75'>
-        {Object.entries(sortLabels).map(([field, label]) => (
+        {Object.entries(SORT_LABELS).map(([field, label]) => (
           <DropdownMenuItem
             key={field}
             onClick={() => handleSort(field as SortField)}

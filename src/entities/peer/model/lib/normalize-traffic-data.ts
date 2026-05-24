@@ -1,6 +1,6 @@
 import { AmneziaPeersResponse } from '@/src/features/peer/model/types/amnezia-api.types';
 import { WireGuardPeerResponse } from '@/src/features/peer/model/types/wg-api.types';
-import { TrafficData } from '../types';
+import { TrafficData } from '../types/types';
 
 type Params = {
   amneziaResponse?: AmneziaPeersResponse;

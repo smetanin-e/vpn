@@ -4,85 +4,53 @@ import { peerRepository } from '@/src/entities/peer/repository/peer.repository';
 import { UnauthorizedError } from '@/src/shared/lib/errors/app-error';
 import { handleApiError } from '@/src/shared/lib/api-error-handler';
 import { logger } from '@/src/shared/lib/logger';
-import { getTotalCountByFilters } from '@/src/entities/peer/model/helpers/get-total-count-by-filter';
+import { parseServerIds } from '@/src/entities/peer/model/helpers/parse-server-ids';
+import { parseIsFree } from '@/src/entities/peer/model/helpers/parse-is-free';
 
-type SortField = 'balance' | 'lastHandshake' | 'sentBytes' | 'created';
-type SortOrder = 'asc' | 'desc';
+const VALID_SORT_FIELDS = ['balance', 'lastHandshake', 'sentBytes', 'createdAt'] as const;
+const VALID_SORT_ORDERS = ['asc', 'desc'] as const;
+
+type SortField = (typeof VALID_SORT_FIELDS)[number];
+type SortOrder = (typeof VALID_SORT_ORDERS)[number];
 
 export async function GET(req: NextRequest) {
   try {
-    // 1. Проверка сессии пользователя — вместо статического токена
+    //  Проверка сессии пользователя — вместо статического токена
     const user = await getUserSession();
     if (!user) {
       throw new UnauthorizedError();
     }
 
-    // 2. Парсинг параметров
+    // Парсинг параметров
     const { searchParams } = new URL(req.url);
 
     const search = searchParams.get('search')?.trim() || '';
     const take = searchParams.get('take') ? parseInt(searchParams.get('take')!, 10) : undefined;
     const skip = searchParams.get('skip') ? parseInt(searchParams.get('skip')!, 10) : undefined;
-
-    // Парсинг фильтрации по серверам (массив)
-    let serverIds: number[] | undefined;
-    const serverIdsParam = searchParams.get('serverIds');
-    if (serverIdsParam) {
-      try {
-        serverIds = JSON.parse(serverIdsParam);
-        if (!Array.isArray(serverIds)) {
-          serverIds = undefined;
-        }
-      } catch {
-        // Если парсинг не удался, пробуем как одиночное значение
-        const singleId = parseInt(serverIdsParam, 10);
-        if (!isNaN(singleId)) {
-          serverIds = [singleId];
-        }
-      }
-    }
-
-    // Парсинг фильтра по платно/бесплатно
-    let isFree: boolean | undefined;
-    const isFreeParam = searchParams.get('isFree');
-    if (isFreeParam !== null) {
-      isFree = isFreeParam === 'true';
-    }
+    const serverIds = parseServerIds(searchParams.get('serverIds'));
+    const isFree = parseIsFree(searchParams.get('isFree'));
 
     // Валидация sortField
-    let sortField: SortField = 'sentBytes';
-    const rawSortField = searchParams.get('sortField');
-    if (
-      rawSortField === 'balance' ||
-      rawSortField === 'lastHandshake' ||
-      rawSortField === 'sentBytes' ||
-      rawSortField === 'created'
-    ) {
-      sortField = rawSortField;
-    }
+    const rawSortField = searchParams.get('sortField') as SortField;
+    const sortField = VALID_SORT_FIELDS.includes(rawSortField) ? rawSortField : 'sentBytes';
 
     // Валидация sortOrder
-    let sortOrder: SortOrder = 'desc';
-    const rawSortOrder = searchParams.get('sortOrder');
-    if (rawSortOrder === 'asc' || rawSortOrder === 'desc') {
-      sortOrder = rawSortOrder;
-    }
+    const rawSortOrder = searchParams.get('sortOrder') as SortOrder;
+    const sortOrder = VALID_SORT_ORDERS.includes(rawSortOrder) ? rawSortOrder : 'desc';
 
-    const peers = await peerRepository.getAllPeersFiltered({
-      search,
-      take,
-      skip,
-      sortField,
-      sortOrder,
-      serverIds,
-      isFree,
-    });
-
-    const total = await getTotalCountByFilters({
-      search,
-      serverIds,
-      isFree,
-    });
+    // Параллельные запросы для производительности
+    const [peers, total] = await Promise.all([
+      peerRepository.getAllPeersFiltered({
+        search,
+        take,
+        skip,
+        sortField,
+        sortOrder,
+        serverIds,
+        isFree,
+      }),
+      peerRepository.getTotalCountByFilters({ search, serverIds, isFree }),
+    ]);
 
     return NextResponse.json({
       data: peers,

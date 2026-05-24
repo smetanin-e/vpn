@@ -4,14 +4,16 @@ import { cn } from '@/src/shared/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/shared/components/ui';
 
 import { useSearchParams } from 'next/navigation';
-import { PeerSort, SortField, SortOrder } from '@/src/entities/peer/ui/peer-sort';
+import { PeerSort } from '@/src/entities/peer/ui/peer-sort';
 import { EmptyData, LoadingBounce, ShowMore } from '@/src/shared/components';
 import { CreatePeerModal } from '@/src/features/peer/ui/create-peer-modal';
 import { SearchPeer } from '@/src/entities/peer/ui/search-peer';
 import { useGetPeers } from '@/src/entities/peer/model/hooks/use-get-peers';
 import { PeerCard } from '@/src/entities/peer/ui/peer-card';
 import { CreateServerModal } from '@/src/features/server/ui/create-server-modal';
-import { FilterPeersModal, FiltersState } from '@/src/features/peer/ui/filter-peers-modal';
+import { FilterPeersModal } from '@/src/features/peer/ui/filters/filter-peers-modal';
+import { SortField, SortOrder } from '@/src/entities/peer/model/types/sort.types';
+import { FiltersState } from '@/src/features/peer/model/types/filter-peers.types';
 
 interface Props {
   className?: string;

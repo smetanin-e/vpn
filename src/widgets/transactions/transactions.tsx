@@ -32,7 +32,7 @@ export const Transactions: React.FC<Props> = ({ className, clientId }) => {
   return (
     <Card
       className={cn(
-        'relative mx-2 border-slate-700 bg-slate-800/50 pb-1 backdrop-blur-sm',
+        'relative mx-2 mb-4 border-slate-700 bg-slate-800/50 pb-1 backdrop-blur-sm',
         className,
       )}
     >

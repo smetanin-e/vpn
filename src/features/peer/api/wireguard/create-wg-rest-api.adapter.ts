@@ -1,7 +1,7 @@
 import { Server } from '@/generated/prisma/client';
 import { createApiClient } from '../create-api-client';
 import { WireGuardPeerResponse } from '../../model/types/wg-api.types';
-import { TrafficData } from '@/src/entities/peer/model/types';
+import { TrafficData } from '@/src/entities/peer/model/types/types';
 import { normalizeTrafficData } from '@/src/entities/peer/model/lib/normalize-traffic-data';
 
 export type WgPeerApiType = {

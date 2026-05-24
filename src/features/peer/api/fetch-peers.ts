@@ -1,4 +1,4 @@
-import { PeerQueryType } from '@/src/entities/peer/model/types';
+import { PeerQueryType } from '@/src/entities/peer/model/types/types';
 import { clientAxiosInstance } from '@/src/shared/api/client';
 import { NotFoundError } from '@/src/shared/lib/errors/app-error';
 import { logger } from '@/src/shared/lib/logger';
