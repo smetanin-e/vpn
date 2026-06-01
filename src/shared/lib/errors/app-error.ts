@@ -55,3 +55,11 @@ export class DatabaseError extends AppError {
     super(message, 500, 'DATABASE_ERROR');
   }
 }
+
+// Создаем специальную ошибку для пира не найденного на сервере
+export class PeerNotFoundOnServerError extends AppError {
+  constructor(message: string = 'Пир не найден на сервере WireGuard') {
+    super(message, 404, 'PEER_NOT_FOUND_ON_SERVER');
+    this.name = 'PeerNotFoundOnServerError';
+  }
+}
