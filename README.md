@@ -84,63 +84,6 @@ src/
 - 🛡️ **Server Actions** — безопасные мутации с валидацией на сервере
 - ♾️ **Infinite Query** — эффективная пагинация больших списков
 
----
-
-## 🚀 Быстрый Старт
-
-### Предварительные требования
-
-- **Node.js** 18+
-- **PostgreSQL** 14+
-- **pnpm** (или npm/yarn)
-
-### Установка
-
-```bash
-# 1. Клонируем репозиторий
-git clone <repository-url>
-cd new-vpn
-
-# 2. Установляем зависимости
-pnpm install
-
-# 3. Настраиваем переменные окружения
-cp .env.example .env.local
-# ✏️ Отредактируй .env.local с твоими данными:
-#    DATABASE_URL=postgresql://user:password@localhost:5432/vpn_db
-#    NEXTAUTH_SECRET=your-secret-key
-#    NEXTAUTH_URL=http://localhost:3000
-
-# 4. Применяем миграции БД
-pnpm exec prisma migrate deploy
-
-# 5. Запускаем dev сервер
-pnpm dev
-```
-
-Открой [http://localhost:3000](http://localhost:3000) в браузере.
-
-### Другие команды
-
-```bash
-# Просмотр данных в БД (Prisma Studio)
-pnpm exec prisma studio
-
-# Создание новой миграции
-pnpm exec prisma migrate dev --name migration_name
-
-# Продакшн сборка
-pnpm build
-pnpm start
-
-# Линтинг кода
-pnpm lint
-```
-
----
-
-## 📊 Ключевые достижения
-
 ### ✅ Архитектура
 
 - [x] Clean Architecture с явным разделением на слои
@@ -213,48 +156,10 @@ pnpm lint
 - Error messages логируются и передаются фронтенду
 - Try-catch обработка в критичных местах
 
----
-
-## 🎯 Возможные Улучшения
-
-**Что я бы добавил дальше:**
-
-- [ ] **Unit & Integration тесты** (Jest, Vitest) — критично для production
-- [ ] **API документация** (Swagger/OpenAPI)
-- [ ] **Логирование** (winston или pino) вместо console.log
-- [ ] **Rate limiting** для защиты от brute-force
-- [ ] **Redis кеширование** для часто запрашиваемых данных
-- [ ] **CI/CD pipeline** (GitHub Actions)
-- [ ] **Docker контейнеризация**
-- [ ] **More comprehensive error boundaries**
-
----
-
-## 📖 Как Использовать в Портфолио
-
-Этот проект демонстрирует:
-
-1. **Архитектурное мышление** — правильное использование паттернов
-2. **Полный цикл разработки** — от идеи до рабочего функционала
-3. **Бизнес-логика** — не просто CRUD, а реальная система
-4. **Modern Stack** — Next.js 16, React 19, TypeScript, PostgreSQL
-5. **Problem Solving** — как я решал сложные задачи (синхронизация, биллинг)
-
-**Для интервью я бы подчеркнул:**
-
-- "Самостоятельно разработал и развернул полнофункциональное приложение"
-- "Применил Clean Architecture и архитектурные паттерны"
-- "Работал с PostgreSQL и сложными миграциями"
-- "Реализовал бизнес-логику (биллинг с ежедневным списанием)"
-- "Использовал современный стек: Next.js 16, React 19, TypeScript"
-
----
-
 ## 📞 Контакты
 
-- GitHub: [@YourUsername](https://github.com/yourusername)
-- Email: your.email@example.com
-- Portfolio: https://your-portfolio.com
+- GitHub: [@smetanin-e](https://github.com/smetanin-e)
+- Email: e91smet15@gmail.com
 
 ---
 
