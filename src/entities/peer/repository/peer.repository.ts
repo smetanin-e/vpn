@@ -43,12 +43,14 @@ interface GetAllPeersFilteredParams {
   sortOrder?: SortOrder;
   serverIds?: number[];
   isFree?: boolean; // true - бесплатные, false - платные, undefined - все
+  deactivated?: boolean;
 }
 
 type CountFiltersParams = {
   search?: string;
   serverIds?: number[];
   isFree?: boolean;
+  deactivated?: boolean;
 };
 
 export const peerRepository = {
@@ -78,10 +80,11 @@ export const peerRepository = {
       sortOrder = 'desc',
       serverIds,
       isFree,
+      deactivated,
     } = params;
 
     const peers = await prisma.peer.findMany({
-      where: buildPeerWhereClause({ search, serverIds, isFree }),
+      where: buildPeerWhereClause({ search, serverIds, isFree, deactivated }),
       select: basePeerSelect,
       orderBy: buildPeerOrderBy(sortField, sortOrder),
       take,

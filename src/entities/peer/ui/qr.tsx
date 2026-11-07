@@ -80,8 +80,8 @@ export const Qr: React.FC<Props> = ({ dbPeerId, peerName }: Props) => {
             <Image
               src={qrUrl}
               alt={`QR для ${peerName}`}
-              width={250}
-              height={250}
+              width={500}
+              height={500}
               className='rounded-lg border shadow-md'
             />
             <p className='text-center text-sm text-muted-foreground'>Отсканируй этот QR-код</p>

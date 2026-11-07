@@ -3,7 +3,7 @@ import React from 'react';
 import { cn } from '@/src/shared/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/shared/components/ui';
 
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { PeerSort } from '@/src/entities/peer/ui/peer-sort';
 import { EmptyData, LoadingBounce, ShowMore } from '@/src/shared/components';
 import { CreatePeerModal } from '@/src/features/peer/ui/create-peer-modal';
@@ -20,30 +20,76 @@ interface Props {
 }
 
 export const Peers: React.FC<Props> = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
+
+  // Читаем параметры из URL
+  const search = searchParams.get('search') || '';
+  const sortField = (searchParams.get('sortField') as SortField) || 'sentBytes';
+  const sortOrder = (searchParams.get('sortOrder') as SortOrder) || 'desc';
+  const serverIds = searchParams.get('serverIds')
+    ? JSON.parse(searchParams.get('serverIds')!)
+    : undefined;
+  const isFree = searchParams.has('isFree') ? searchParams.get('isFree') === 'true' : undefined;
+  const deactivated = searchParams.has('deactivated')
+    ? searchParams.get('deactivated') === 'true'
+    : undefined;
   const [searchValue, setSearchValue] = React.useState(searchParams.get('search') || '');
 
-  // Состояния сортировки
-  const [sortField, setSortField] = React.useState<SortField>('sentBytes');
-  const [sortOrder, setSortOrder] = React.useState<SortOrder>('desc');
-  const [filters, setFilters] = React.useState<FiltersState>({
-    serverIds: [],
-    isFree: null,
-  });
+  // Функция обновления URL
+  const updateURL = (updates: Record<string, string | number | boolean | null | undefined>) => {
+    const params = new URLSearchParams(searchParams.toString());
 
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === null || value === undefined || value === '') {
+        params.delete(key);
+      } else if (typeof value === 'boolean') {
+        params.set(key, value.toString());
+      } else {
+        params.set(key, String(value));
+      }
+    });
+
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
+  // Обработчик сортировки
+  const handleSort = (field: SortField, order: SortOrder) => {
+    updateURL({
+      sortField: field,
+      sortOrder: order,
+      page: null,
+    });
+  };
+
+  // Обработчик фильтров
+  const handleFiltersChange = (newFilters: FiltersState) => {
+    updateURL({
+      serverIds: newFilters.serverIds?.length ? JSON.stringify(newFilters.serverIds) : null,
+      isFree: newFilters.isFree,
+      deactivated: newFilters.deactivated,
+      page: null,
+    });
+  };
+
+  // Получаем данные с параметрами из URL
   const { data, status, error, hasNextPage, fetchNextPage, isFetchingNextPage } = useGetPeers(
-    searchValue,
+    search,
     sortField,
     sortOrder,
-    filters.serverIds,
-    filters.isFree,
+    serverIds,
+    isFree,
+    deactivated,
   );
 
   const peers = data?.pages.flatMap((page) => page.peers) ?? [];
+  const total = data?.pages[0].total;
 
-  const handleSort = (field: SortField, order: SortOrder) => {
-    setSortField(field);
-    setSortOrder(order);
+  // Текущие фильтры для модалки
+  const currentFilters: FiltersState = {
+    serverIds: serverIds || [],
+    isFree: isFree ?? null,
+    deactivated: deactivated ?? null,
   };
 
   if (status === 'error') {
@@ -76,9 +122,12 @@ export const Peers: React.FC<Props> = () => {
             setSearchValue={setSearchValue}
             searchParams={searchParams}
           />
-          <div className='flex justify-end gap-2'>
+          <div className='flex items-center justify-end gap-2'>
+            <p>
+              Всего: <span className='text-orange-300'>{total}</span>
+            </p>
             <PeerSort sortField={sortField} sortOrder={sortOrder} onSort={handleSort} />
-            <FilterPeersModal filters={filters} onFiltersChange={setFilters} />
+            <FilterPeersModal filters={currentFilters} onFiltersChange={handleFiltersChange} />
           </div>
         </div>
       </CardHeader>

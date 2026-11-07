@@ -25,6 +25,7 @@ export async function syncTraffic() {
             baseUrl: true,
             apiToken: true,
             description: true,
+            protocol: true,
           },
         },
       },

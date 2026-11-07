@@ -53,7 +53,7 @@ export const usePeerMutations = () => {
           queryClient.invalidateQueries({ queryKey: ['server-stats'] }),
         ]);
         toast.success('VPN успешно удален');
-        router.push('/dashboard');
+        router.push('/');
       } else {
         toast.error(res.message || 'Ошибка при удалении конфигурации VPN');
       }

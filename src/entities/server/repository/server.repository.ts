@@ -32,6 +32,7 @@ export const serverRepository = {
         description: data.serverDescription,
         baseUrl: data.serverAddress,
         apiToken: data.apiToken,
+        protocol: data.protocol,
       },
     });
   },

@@ -10,6 +10,7 @@ interface FetchPeersParams {
   sortOrder: string;
   serverIds?: number[]; // ID выбранных серверов
   isFree?: boolean | null; // true - только бесплатные, false - только платные, null/undefined - все
+  deactivated?: boolean | null; // true - только отключенные, false - только включенные, null/undefined - все
 }
 
 export const fetchPeers = async ({
@@ -19,6 +20,7 @@ export const fetchPeers = async ({
   sortOrder = 'desc',
   serverIds,
   isFree,
+  deactivated,
 }: FetchPeersParams): Promise<{
   peers: PeerQueryType[];
   nextPage: number | undefined;
@@ -43,6 +45,10 @@ export const fetchPeers = async ({
     //Фильтрация по типу доступа (если указан)
     if (isFree !== undefined && isFree !== null) {
       params.set('isFree', isFree.toString());
+    }
+
+    if (deactivated !== undefined && deactivated !== null) {
+      params.set('deactivated', deactivated.toString());
     }
 
     const { data } = await clientAxiosInstance.get<{ data: PeerQueryType[]; total: number }>(

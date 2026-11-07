@@ -2,14 +2,19 @@ import { clientRepository } from '@/src/entities/client/repository/client.reposi
 import { ClientCard } from '@/src/entities/client/ui/client-card';
 import { ClientLink } from '@/src/entities/client/ui/client-link';
 import { СlientNotFound } from '@/src/entities/client/ui/client-not-found';
+import { getUserSession } from '@/src/features/auth/actions/get-user-session';
 import { Logo } from '@/src/shared/components';
 import { Button } from '@/src/shared/components/ui';
 import { Transactions } from '@/src/widgets/transactions/transactions';
 
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
 export default async function PeerPage({ params }: { params: Promise<{ id: string }> }) {
+  const user = await getUserSession();
+  if (!user) return redirect('/auth');
+
   const { id } = await params;
 
   const client = await clientRepository.findClienWithRelations(Number(id));
@@ -28,7 +33,7 @@ export default async function PeerPage({ params }: { params: Promise<{ id: strin
         <code className='truncate font-mono text-lg'>{client.id}</code>
       </div>
       <div className='mx-2 flex justify-between'>
-        <Link href={'/dashboard'}>
+        <Link href={'/'}>
           {' '}
           <Button variant='outline' size='sm'>
             <ArrowLeft className='h-4 w-4' />

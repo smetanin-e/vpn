@@ -87,6 +87,17 @@ export const CreateServerForm: React.FC<Props> = ({ setOpen }) => {
           />
         </div>
 
+        <div className='space-y-2'>
+          <FormInput
+            label='Протокол'
+            name='protocol'
+            id='protocol'
+            type='text'
+            placeholder='Введите протокол. Например "amneziawg3"'
+            required
+          />
+        </div>
+
         <Button disabled={form.formState.isSubmitting} className='mt-2 w-full' type='submit'>
           {form.formState.isSubmitting ? 'Создание конфигурации' : 'Создать'}
         </Button>

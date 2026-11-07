@@ -32,6 +32,7 @@ export type ClientDTO = {
       description: string;
       baseUrl: string;
       apiToken: string;
+      protocol: string;
     } | null;
   } | null;
 };

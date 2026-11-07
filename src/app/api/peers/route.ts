@@ -6,6 +6,7 @@ import { handleApiError } from '@/src/shared/lib/api-error-handler';
 import { logger } from '@/src/shared/lib/logger';
 import { parseServerIds } from '@/src/entities/peer/model/helpers/parse-server-ids';
 import { parseIsFree } from '@/src/entities/peer/model/helpers/parse-is-free';
+import { parseStatus } from '@/src/entities/peer/model/helpers/parse-status';
 
 const VALID_SORT_FIELDS = ['balance', 'lastHandshake', 'sentBytes', 'createdAt'] as const;
 const VALID_SORT_ORDERS = ['asc', 'desc'] as const;
@@ -29,6 +30,7 @@ export async function GET(req: NextRequest) {
     const skip = searchParams.get('skip') ? parseInt(searchParams.get('skip')!, 10) : undefined;
     const serverIds = parseServerIds(searchParams.get('serverIds'));
     const isFree = parseIsFree(searchParams.get('isFree'));
+    const deactivated = parseStatus(searchParams.get('deactivated'));
 
     // Валидация sortField
     const rawSortField = searchParams.get('sortField') as SortField;
@@ -48,8 +50,9 @@ export async function GET(req: NextRequest) {
         sortOrder,
         serverIds,
         isFree,
+        deactivated,
       }),
-      peerRepository.getTotalCountByFilters({ search, serverIds, isFree }),
+      peerRepository.getTotalCountByFilters({ search, serverIds, isFree, deactivated }),
     ]);
 
     return NextResponse.json({
