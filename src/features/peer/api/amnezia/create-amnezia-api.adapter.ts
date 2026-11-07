@@ -40,7 +40,7 @@ export function createAmneziaApiAdapter(server: Server): AmneziaPeerApiType {
     async create(clientName: string): Promise<{ id: string; config: string }> {
       const res = await client.post<AmneziaCreatePeerResponse>('/clients', {
         clientName,
-        protocol: 'amneziawg2',
+        protocol: server.protocol,
       });
 
       const data = { id: res.data.client.id, config: res.data.client.config };
@@ -53,7 +53,7 @@ export function createAmneziaApiAdapter(server: Server): AmneziaPeerApiType {
       await client.patch<AmneziaChangeStatusResponse>('/clients', {
         status,
         clientId: peerId,
-        protocol: 'amneziawg2',
+        protocol: server.protocol,
       });
       return;
     },
@@ -62,7 +62,7 @@ export function createAmneziaApiAdapter(server: Server): AmneziaPeerApiType {
       await client.delete<AmneziaDeletePeerResponse>('/clients', {
         data: {
           clientId: peerId,
-          protocol: 'amneziawg2',
+          protocol: server.protocol,
         },
       });
       return;

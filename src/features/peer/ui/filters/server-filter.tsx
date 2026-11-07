@@ -17,7 +17,7 @@ export const ServerFilter: React.FC<ServerFilterProps> = ({
   return (
     <div className='space-y-3'>
       <Label className='text-base font-semibold text-white'>Серверы</Label>
-      <div className='space-y-2 max-h-48 overflow-y-auto'>
+      <div className='space-y-2'>
         {servers.map((server) => (
           <div key={server.serverId} className='flex items-center space-x-2'>
             <Checkbox

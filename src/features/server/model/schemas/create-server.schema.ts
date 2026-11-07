@@ -7,6 +7,7 @@ export const createServerSchema = z.object({
   serverDescription: z.string().min(2, { message: 'Введите описание сервера' }),
   serverAddress: z.string().url({ message: 'Введите корректный URL' }),
   apiToken: z.string().min(6, { message: 'Введите корректный API ключ' }),
+  protocol: z.string().min(6, { message: 'Введите корректный протокол' }),
 });
 
 export type CreateServerType = z.infer<typeof createServerSchema>;

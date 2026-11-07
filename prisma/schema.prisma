@@ -54,7 +54,7 @@ model Server {
 
     baseUrl  String
     apiToken String
-    protocol String?
+    protocol String
 
     peers Peer[]
 }
