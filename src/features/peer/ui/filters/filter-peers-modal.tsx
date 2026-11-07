@@ -17,6 +17,7 @@ import React from 'react';
 import { FilterPeersModalProps } from '../../model/types/filter-peers.types';
 import { useFilterPeers } from '../../model/hooks/use-filter-peers';
 import { ActiveFilters, ServerFilter, TariffFilter } from '@/src/features/peer/ui/filters';
+import { StatusFilter } from './status-filter';
 
 export const FilterPeersModal: React.FC<FilterPeersModalProps> = ({
   className,
@@ -35,11 +36,16 @@ export const FilterPeersModal: React.FC<FilterPeersModalProps> = ({
     handleServerChange,
     handleTariffChange,
     handleSelectAllTariffs,
+    handleStatusChange,
+    handleSelectAllStatuses,
     handleReset,
     getActiveFiltersCount,
     isPaidSelected,
     isFreeSelected,
     isAllTariffsSelected,
+    isActiveSelected,
+    isInactiveSelected,
+    isAllStatusSelected,
   } = useFilterPeers(filters);
 
   const handleApply = () => {
@@ -84,6 +90,13 @@ export const FilterPeersModal: React.FC<FilterPeersModalProps> = ({
               isFreeSelected={isFreeSelected}
               onSelectAll={handleSelectAllTariffs}
               onTariffChange={handleTariffChange}
+            />
+            <StatusFilter
+              isAllSelected={isAllStatusSelected}
+              isActiveSelected={isActiveSelected}
+              isInactiveSelected={isInactiveSelected}
+              onSelectAll={handleSelectAllStatuses}
+              onStatusChange={handleStatusChange}
             />
 
             <ActiveFilters

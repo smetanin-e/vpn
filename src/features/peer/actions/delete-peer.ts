@@ -55,8 +55,8 @@ export async function deletePeerAction(dbPeerId: number) {
 
     try {
       await Promise.all([
-        peerRepository.deletePeer(peer.id),
         transactionRepository.deleteByClientId(client.id),
+        peerRepository.deletePeer(peer.id),
         clientRepository.deleteClient(client.id),
       ]);
 

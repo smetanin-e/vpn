@@ -38,7 +38,7 @@ export const LoginForm: React.FC<Props> = ({ onClose }) => {
 
       //закрыть модалку
       onClose?.();
-      router.push('/dashboard');
+      router.push('/');
       toast.success('Успешная авторизация!');
     } catch (error) {
       logger.error('[LOGIN] Error', error);

@@ -8,7 +8,7 @@ import { redirect } from 'next/navigation';
 
 export default async function Page() {
   const user = await getUserSession();
-  if (!user) return redirect('/');
+  if (!user) return redirect('/auth');
 
   return (
     <div className='flex min-h-screen flex-col bg-linear-to-br from-slate-900 via-blue-900 to-slate-900 p-4'>
@@ -16,10 +16,10 @@ export default async function Page() {
         userId={user.id}
         title='Панель транзакций'
         name={user.name}
-        links={<Link href={'/dashboard'}>Панель управления</Link>}
+        links={<Link href={'/'}>Панель управления</Link>}
       />
       <div className='m-2'>
-        <Link href={'/dashboard'}>
+        <Link href={'/'}>
           {' '}
           <Button variant='outline' size='sm'>
             <ArrowLeft className='h-4 w-4' />

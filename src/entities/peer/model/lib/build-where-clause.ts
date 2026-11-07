@@ -1,15 +1,17 @@
-import { Prisma } from '@/generated/prisma/client';
+import { PeerStatus, Prisma } from '@/generated/prisma/client';
 
 type BuildWhereClauseParams = {
   search?: string;
   serverIds?: number[];
   isFree?: boolean;
+  deactivated?: boolean;
 };
 
 export function buildPeerWhereClause({
   search,
   serverIds,
   isFree,
+  deactivated,
 }: BuildWhereClauseParams): Prisma.PeerWhereInput {
   const where: Prisma.PeerWhereInput = {};
 
@@ -34,6 +36,12 @@ export function buildPeerWhereClause({
   // Фильтр по статусу тарифа
   if (isFree !== undefined) {
     where.client = { isFree };
+  }
+
+  // Фильтр по (включен/отключен)
+  if (deactivated !== undefined) {
+    const status = deactivated ? PeerStatus.INACTIVE : PeerStatus.ACTIVE;
+    where.status = status;
   }
 
   return where;

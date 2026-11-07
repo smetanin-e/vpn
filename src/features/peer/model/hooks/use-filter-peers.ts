@@ -33,10 +33,31 @@ export function useFilterPeers(initialFilters: FiltersState) {
     }
   };
 
+  const handleStatusChange = (type: 'ACTIVE' | 'INACTIVE', checked: boolean) => {
+    if (type === 'ACTIVE') {
+      setLocalFilters((prev) => ({
+        ...prev,
+        deactivated: checked ? false : prev.deactivated === true ? true : null,
+      }));
+    } else {
+      setLocalFilters((prev) => ({
+        ...prev,
+        deactivated: checked ? true : prev.deactivated === false ? false : null,
+      }));
+    }
+  };
+
+  const handleSelectAllStatuses = (checked: boolean) => {
+    if (checked) {
+      setLocalFilters((prev) => ({ ...prev, deactivated: null }));
+    }
+  };
+
   const handleReset = () => {
     setLocalFilters({
       serverIds: [],
       isFree: null,
+      deactivated: null,
     });
   };
 
@@ -50,6 +71,9 @@ export function useFilterPeers(initialFilters: FiltersState) {
   const isPaidSelected = localFilters.isFree === false;
   const isFreeSelected = localFilters.isFree === true;
   const isAllTariffsSelected = localFilters.isFree === null;
+  const isActiveSelected = localFilters.deactivated === false;
+  const isInactiveSelected = localFilters.deactivated === true;
+  const isAllStatusSelected = localFilters.deactivated === null;
 
   return {
     localFilters,
@@ -57,10 +81,15 @@ export function useFilterPeers(initialFilters: FiltersState) {
     handleServerChange,
     handleTariffChange,
     handleSelectAllTariffs,
+    handleStatusChange,
+    handleSelectAllStatuses,
     handleReset,
     getActiveFiltersCount,
     isPaidSelected,
     isFreeSelected,
     isAllTariffsSelected,
+    isActiveSelected,
+    isInactiveSelected,
+    isAllStatusSelected,
   };
 }

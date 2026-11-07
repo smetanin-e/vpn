@@ -11,6 +11,7 @@ export const useGetPeers = (
   sortOrder: SortOrder = 'desc',
   serverIds?: number[],
   isFree?: boolean | null,
+  deactivated?: boolean | null,
 ) => {
   const [debouncedSearch, setDebouncedSearch] = React.useState(search);
 
@@ -23,10 +24,19 @@ export const useGetPeers = (
     [search],
   );
   return useInfiniteQuery({
-    queryKey: ['peers', debouncedSearch, sortField, sortOrder, serverIds, isFree],
+    queryKey: ['peers', debouncedSearch, sortField, sortOrder, serverIds, isFree, deactivated],
     queryFn: ({ pageParam = 0 }) =>
-      fetchPeers({ pageParam, search: debouncedSearch, sortField, sortOrder, serverIds, isFree }),
+      fetchPeers({
+        pageParam,
+        search: debouncedSearch,
+        sortField,
+        sortOrder,
+        serverIds,
+        isFree,
+        deactivated,
+      }),
     getNextPageParam: (lastPage) => lastPage.nextPage,
     initialPageParam: 0,
+    refetchOnWindowFocus: false,
   });
 };

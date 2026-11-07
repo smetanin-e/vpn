@@ -11,7 +11,7 @@ export const СlientNotFound: React.FC<Props> = () => {
   return (
     <div className='flex min-h-screen flex-col bg-linear-to-br from-slate-900 via-blue-900 to-slate-900'>
       <div className='m-2'>
-        <Link href={'/dashboard'}>
+        <Link href={'/'}>
           {' '}
           <Button variant='outline' size='sm'>
             <ArrowLeft className='h-4 w-4' />
